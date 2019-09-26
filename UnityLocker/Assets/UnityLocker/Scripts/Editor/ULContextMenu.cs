@@ -11,7 +11,7 @@ namespace Alf.UnityLocker.Editor
 		[MenuItem(LockMenuName)]
 		public static void Lock()
 		{
-			ULLocker.TryLockAsset(Selection.activeObject);
+			ULLocker.TryLockAsset(Selection.activeObject, (success) => { });
 		}
 
 		[MenuItem(LockMenuName, true)]
@@ -23,7 +23,7 @@ namespace Alf.UnityLocker.Editor
 		[MenuItem(UnlockMenuName)]
 		public static void Unlock()
 		{
-			ULLocker.TryUnlockAsset(Selection.activeObject);
+			ULLocker.TryUnlockAsset(Selection.activeObject, (success) => { });
 		}
 
 		[MenuItem(UnlockMenuName, true)]

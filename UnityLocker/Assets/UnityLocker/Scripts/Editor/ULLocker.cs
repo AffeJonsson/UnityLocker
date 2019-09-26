@@ -2,13 +2,18 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using UnityEditor;
 using UnityEngine;
 
 namespace Alf.UnityLocker.Editor
 {
+	[InitializeOnLoad]
 	public static class ULLocker
 	{
 		private static Dictionary<UnityEngine.Object, ULUser> sm_lockedAssets;
+		private static float sm_nextFetchTime;
+
+		private const float TimeBetweenFetches = 10f;
 
 		public static Dictionary<UnityEngine.Object, ULUser> GetLockedAssets
 		{
@@ -17,27 +22,73 @@ namespace Alf.UnityLocker.Editor
 
 		static ULLocker()
 		{
-			FetchLockedAssets();
+			ULUserManager.CurrentUser = new ULUser(ULLockSettingsHelper.Settings.Username);
+			EditorApplication.update += Update;
 		}
 
-		public static bool TryLockAsset(UnityEngine.Object asset)
+		private static void Update()
 		{
-			if (IsAssetLocked(asset))
+			if (Time.realtimeSinceStartup >= sm_nextFetchTime)
 			{
-				return false;
+				FetchLockedAssets(null);
 			}
-			sm_lockedAssets.Add(asset, ULUserManager.CurrentUser);
-			return true;
 		}
 
-		public static bool TryUnlockAsset(UnityEngine.Object asset)
+		public static void TryLockAsset(UnityEngine.Object asset, Action<bool> onLockComplete)
 		{
-			if (!IsAssetLockedByMe(asset))
+			FetchLockedAssets(() =>
 			{
-				return false;
+				if (IsAssetLocked(asset))
+				{
+					Debug.Log("Asset " + asset + " is already locked");
+					onLockComplete(false);
+					return;
+				}
+				Debug.Log("Locked asset " + asset);
+				sm_lockedAssets.Add(asset, ULUserManager.CurrentUser);
+				onLockComplete(true);
+			});
+		}
+
+		public static void TryUnlockAsset(UnityEngine.Object asset, Action<bool> onUnlockComplete)
+		{
+			FetchLockedAssets(() =>
+			{
+				if (!IsAssetLockedByMe(asset))
+				{
+					Debug.Log("Asset " + asset + " is not locked by you!");
+					onUnlockComplete(false);
+					return;
+				}
+				Debug.Log("Unlocked asset " + asset);
+				sm_lockedAssets.Remove(asset);
+				onUnlockComplete(true);
+			});
+		}
+
+		public static void FetchLockedAssets(Action onAssetsFetched)
+		{
+			sm_nextFetchTime = Time.realtimeSinceStartup + TimeBetweenFetches;
+			var url = ULLockSettingsHelper.Settings.GetLockedAssetsUrl;
+			FecthLockedAssetsAsync(url, (data) =>
+			{
+				var lockData = JsonConvert.DeserializeObject<ULLockData>(data);
+				sm_lockedAssets = lockData.LockData;
+				onAssetsFetched?.Invoke();
+			});
+		}
+
+		public static void IsAssetLocked(UnityEngine.Object asset, Action<bool> onLockedChecked)
+		{
+			if (sm_lockedAssets == null)
+			{
+				FetchLockedAssets(() =>
+				{
+					onLockedChecked?.Invoke(IsAssetLocked(asset));
+				});
+				return;
 			}
-			sm_lockedAssets.Remove(asset);
-			return true;
+			onLockedChecked?.Invoke(IsAssetLocked(asset));
 		}
 
 		public static bool IsAssetLocked(UnityEngine.Object asset)
@@ -45,17 +96,17 @@ namespace Alf.UnityLocker.Editor
 			return sm_lockedAssets.ContainsKey(asset);
 		}
 
-		public static bool IsAssetLockedByMe(UnityEngine.Object asset)
+		private static bool IsAssetLockedByMe(UnityEngine.Object asset)
 		{
 			ULUser locker;
 			if (sm_lockedAssets.TryGetValue(asset, out locker))
 			{
-				return locker == ULUserManager.CurrentUser;
+				return locker.Equals(ULUserManager.CurrentUser);
 			}
 			return false;
 		}
 
-		public static bool IsAssetLockedBySomeoneElse(UnityEngine.Object asset)
+		private static bool IsAssetLockedBySomeoneElse(UnityEngine.Object asset)
 		{
 			ULUser locker;
 			if (sm_lockedAssets.TryGetValue(asset, out locker))
@@ -65,23 +116,17 @@ namespace Alf.UnityLocker.Editor
 			return false;
 		}
 
-		public static void FetchLockedAssets()
+		private static void FecthLockedAssetsAsync(string url, Action<string> onComplete)
 		{
-			var www = new WWW(ULLockSettingsHelper.Settings.GetLockedAssetsUrl);
-			FecthLockedAssetsAsync(www, (data) =>
+			// TODO: WebRequest
+			var asset = AssetDatabase.LoadAssetAtPath<TextAsset>(url);
+			if (asset == null)
 			{
-				var lockData = JsonConvert.DeserializeObject<ULLockData>(data);
-				sm_lockedAssets = lockData.LockData;
-			});
-		}
-
-		private static async void FecthLockedAssetsAsync(WWW webRequest, Action<string> onComplete)
-		{
-			while (!webRequest.isDone)
-			{
-				await Task.Delay(25);
+				Debug.LogError("Asset at url " + url + " is null");
+				onComplete("{}");
+				return;
 			}
-			onComplete(webRequest.text);
+			onComplete(asset.text);
 		}
 	}
 }

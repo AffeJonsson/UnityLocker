@@ -11,7 +11,6 @@ namespace Alf.UnityLocker.Editor
 
 		public ULLockData(Dictionary<string, string> rawLockData)
 		{
-			Debug.Log("Create ULLockData");
 			LockData = new Dictionary<UnityEngine.Object, ULUser>(rawLockData.Count);
 			foreach (var data in rawLockData)
 			{

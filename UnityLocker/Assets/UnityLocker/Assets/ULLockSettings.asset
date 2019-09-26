@@ -11,4 +11,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a11c548d67fe0814fb186921569cd5fa, type: 3}
   m_Name: ULLockSettings
   m_EditorClassIdentifier: 
-  m_baseUrl: file:///D:\Git\Repos\UnityLocker\UnityLocker\Assets\UnityLocker\Assets
+  m_username: Alfred
+  m_baseUrl: Assets/UnityLocker/Assets

@@ -12,7 +12,7 @@ namespace Alf.UnityLocker.Editor
 			base.OnInspectorGUI();
 			if (GUILayout.Button("Fetch"))
 			{
-				ULLocker.FetchLockedAssets();
+				ULLocker.FetchLockedAssets(null);
 			}
 		}
 	}
