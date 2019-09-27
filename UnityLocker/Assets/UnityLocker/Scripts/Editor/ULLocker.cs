@@ -34,35 +34,35 @@ namespace Alf.UnityLocker.Editor
 			}
 		}
 
-		public static void TryLockAsset(UnityEngine.Object asset, Action<bool> onLockComplete)
+		public static void TryLockAsset(UnityEngine.Object asset, Action<bool, string> onLockComplete)
 		{
 			FetchLockedAssets(() =>
 			{
 				if (IsAssetLocked(asset))
 				{
 					Debug.Log("Asset " + asset + " is already locked");
-					onLockComplete(false);
+					onLockComplete(false, "Asset is locked by " + sm_lockedAssets[asset].Name);
 					return;
 				}
 				Debug.Log("Locked asset " + asset);
 				sm_lockedAssets.Add(asset, ULUserManager.CurrentUser);
-				onLockComplete(true);
+				onLockComplete(true, null);
 			});
 		}
 
-		public static void TryUnlockAsset(UnityEngine.Object asset, Action<bool> onUnlockComplete)
+		public static void TryUnlockAsset(UnityEngine.Object asset, Action<bool, string> onUnlockComplete)
 		{
 			FetchLockedAssets(() =>
 			{
 				if (!IsAssetLockedByMe(asset))
 				{
 					Debug.Log("Asset " + asset + " is not locked by you!");
-					onUnlockComplete(false);
+					onUnlockComplete(false, "Asset is not locked by you, it's locked by " + sm_lockedAssets[asset].Name);
 					return;
 				}
 				Debug.Log("Unlocked asset " + asset);
 				sm_lockedAssets.Remove(asset);
-				onUnlockComplete(true);
+				onUnlockComplete(true, null);
 			});
 		}
 

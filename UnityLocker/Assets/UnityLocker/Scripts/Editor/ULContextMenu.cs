@@ -11,7 +11,13 @@ namespace Alf.UnityLocker.Editor
 		[MenuItem(LockMenuName)]
 		public static void Lock()
 		{
-			ULLocker.TryLockAsset(Selection.activeObject, (success) => { });
+			ULLocker.TryLockAsset(Selection.activeObject, (success, errorMessage) =>
+			{
+				if (!success)
+				{
+					EditorUtility.DisplayDialog("Asset locking failed", "Asset locking failed\n" + errorMessage, "OK");
+				}
+			});
 		}
 
 		[MenuItem(LockMenuName, true)]
@@ -23,7 +29,13 @@ namespace Alf.UnityLocker.Editor
 		[MenuItem(UnlockMenuName)]
 		public static void Unlock()
 		{
-			ULLocker.TryUnlockAsset(Selection.activeObject, (success) => { });
+			ULLocker.TryUnlockAsset(Selection.activeObject, (success, errorMessage) =>
+			{
+				if (!success)
+				{
+					EditorUtility.DisplayDialog("Asset unlocking failed", "Asset unlocking failed\n" + errorMessage, "OK");
+				}
+			});
 		}
 
 		[MenuItem(UnlockMenuName, true)]
