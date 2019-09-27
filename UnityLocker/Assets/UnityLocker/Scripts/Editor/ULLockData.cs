@@ -7,7 +7,7 @@ namespace Alf.UnityLocker.Editor
 {
 	public class ULLockData
 	{
-		public Dictionary<UnityEngine.Object, ULUser> LockData;
+		public readonly Dictionary<UnityEngine.Object, ULUser> LockData;
 
 		public ULLockData(Dictionary<string, string> rawLockData)
 		{

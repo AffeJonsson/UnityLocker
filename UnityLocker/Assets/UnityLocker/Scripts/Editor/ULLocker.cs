@@ -96,7 +96,7 @@ namespace Alf.UnityLocker.Editor
 			return sm_lockedAssets.ContainsKey(asset);
 		}
 
-		private static bool IsAssetLockedByMe(UnityEngine.Object asset)
+		public static bool IsAssetLockedByMe(UnityEngine.Object asset)
 		{
 			ULUser locker;
 			if (sm_lockedAssets.TryGetValue(asset, out locker))
@@ -106,12 +106,12 @@ namespace Alf.UnityLocker.Editor
 			return false;
 		}
 
-		private static bool IsAssetLockedBySomeoneElse(UnityEngine.Object asset)
+		public static bool IsAssetLockedBySomeoneElse(UnityEngine.Object asset)
 		{
 			ULUser locker;
 			if (sm_lockedAssets.TryGetValue(asset, out locker))
 			{
-				return locker != ULUserManager.CurrentUser;
+				return !locker.Equals(ULUserManager.CurrentUser);
 			}
 			return false;
 		}
