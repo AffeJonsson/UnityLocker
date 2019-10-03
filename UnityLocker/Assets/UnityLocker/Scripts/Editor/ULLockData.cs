@@ -5,24 +5,38 @@ using UnityEngine;
 
 namespace Alf.UnityLocker.Editor
 {
+	[Serializable]
 	public class ULLockData
 	{
+		[Serializable]
+		public struct AssetLockData
+		{
+			public string Guid;
+			public string LockerName;
+		}
+
 		public readonly Dictionary<UnityEngine.Object, ULUser> LockData;
 
-		public ULLockData(Dictionary<string, string> rawLockData)
+		public ULLockData(AssetLockData[] rawLockData)
 		{
-			LockData = new Dictionary<UnityEngine.Object, ULUser>(rawLockData.Count);
+			if(LockData == null)
+			{
+				LockData = new Dictionary<UnityEngine.Object, ULUser>(rawLockData.Length);
+			}
+			else
+			{
+				LockData.Clear();
+			}
 			foreach (var data in rawLockData)
 			{
-				var assetPath = AssetDatabase.GUIDToAssetPath(data.Key);
+				var assetPath = AssetDatabase.GUIDToAssetPath(data.Guid);
 				if (string.IsNullOrEmpty(assetPath))
 				{
-					Debug.LogError("Asset with GUID " + data.Key + ", locked by " + data.Value + ", was not found");
+					Debug.LogError("Asset with GUID " + data.Guid + ", locked by " + data.LockerName + ", was not found");
 					continue;
 				}
 				var asset = AssetDatabase.LoadAssetAtPath<UnityEngine.Object>(assetPath);
-				// TODO: Fetch user instead of creating a new one
-				LockData[asset] = new ULUser(data.Value);
+				LockData[asset] = ULUserManager.GetUser(data.LockerName);
 			}
 		}
 	}

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using UnityEditor;
-using UnityEngine;
 
 namespace Alf.UnityLocker.Editor
 {
@@ -15,9 +14,9 @@ namespace Alf.UnityLocker.Editor
 			for (var i = 0; i < paths.Length; i++)
 			{
 				var asset = AssetDatabase.LoadAssetAtPath<UnityEngine.Object>(paths[i]);
-				if (ULLocker.IsAssetLockedBySomeoneElse(asset))
+				if (asset != null && ULLocker.IsAssetLockedBySomeoneElse(asset))
 				{
-					pathsLocked += paths[i] + "\n";
+					pathsLocked += paths[i] + " (" + ULLocker.GetAssetLocker(asset).Name + ")\n";
 					indexesLocked.Add(i);
 				}
 			}
@@ -27,20 +26,27 @@ namespace Alf.UnityLocker.Editor
 			{
 				return paths;
 			}
-
-			if (EditorUtility.DisplayDialog("Cannot save some assets", "The following assets are locked:\n" + pathsLocked + "Do you want to save the other assets?", "Yes", "No"))
+			
+			if (paths.Length - indexesLocked.Count > 0)
 			{
-				var arr = new string[paths.Length - indexesLocked.Count];
-				var arrIndex = 0;
-				for (var i = 0; i < paths.Length; i++)
+				if (EditorUtility.DisplayDialog("Cannot save some assets", "The following assets are locked:\n" + pathsLocked + "Do you want to save the other assets?", "Yes", "No"))
 				{
-					if (!indexesLocked.Contains(i))
+					var arr = new string[paths.Length - indexesLocked.Count];
+					var arrIndex = 0;
+					for (var i = 0; i < paths.Length; i++)
 					{
-						arr[arrIndex++] = paths[i];
+						if (!indexesLocked.Contains(i))
+						{
+							arr[arrIndex++] = paths[i];
+						}
 					}
-				}
 
-				return arr;
+					return arr;
+				}
+			}
+			else
+			{
+				EditorUtility.DisplayDialog("Cannot save assets", "The following assets are locked:\n" + pathsLocked, "Ok");
 			}
 			return new string[0];
 		}

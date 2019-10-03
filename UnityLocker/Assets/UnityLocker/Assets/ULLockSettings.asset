@@ -12,4 +12,4 @@ MonoBehaviour:
   m_Name: ULLockSettings
   m_EditorClassIdentifier: 
   m_username: Alfred
-  m_baseUrl: Assets/UnityLocker/Assets
+  m_baseUrl: localhost:5000

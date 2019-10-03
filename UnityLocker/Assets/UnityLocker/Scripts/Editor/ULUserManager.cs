@@ -1,24 +1,29 @@
-﻿namespace Alf.UnityLocker.Editor
+﻿using System.Collections.Generic;
+
+namespace Alf.UnityLocker.Editor
 {
 	public static class ULUserManager
 	{
 		private static ULUser sm_currentUser;
+		private static Dictionary<string, ULUser> sm_users = new Dictionary<string, ULUser>(8);
 
-		public static ULUser CurrentUser
+		public static ULUser CurrentUser { get; set; }
+
+		static ULUserManager()
 		{
-			get
-			{
-				if (sm_currentUser == null)
-				{
-					// TODO: Require creation of user.
-				}
+			CurrentUser = GetUser(ULLockSettingsHelper.Settings.Username);
+		}
 
-				return sm_currentUser;
-			}
-			set
+		public static ULUser GetUser(string name)
+		{
+			ULUser user;
+			if (sm_users.TryGetValue(name, out user))
 			{
-				sm_currentUser = value;
+				return user;
 			}
+			user = new ULUser(name);
+			sm_users.Add(name, user);
+			return user;
 		}
 	}
 }

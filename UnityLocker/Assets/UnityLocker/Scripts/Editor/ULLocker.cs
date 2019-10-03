@@ -1,6 +1,10 @@
 ﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Net;
+using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using UnityEditor;
 using UnityEngine;
@@ -15,14 +19,14 @@ namespace Alf.UnityLocker.Editor
 
 		private const float TimeBetweenFetches = 10f;
 
-		public static Dictionary<UnityEngine.Object, ULUser> GetLockedAssets
+		public static bool HasFetched
 		{
-			get { return sm_lockedAssets; }
+			get;
+			private set;
 		}
 
 		static ULLocker()
 		{
-			ULUserManager.CurrentUser = new ULUser(ULLockSettingsHelper.Settings.Username);
 			EditorApplication.update += Update;
 		}
 
@@ -46,7 +50,10 @@ namespace Alf.UnityLocker.Editor
 				}
 				Debug.Log("Locked asset " + asset);
 				sm_lockedAssets.Add(asset, ULUserManager.CurrentUser);
-				onLockComplete(true, null);
+				LockAssetAsync(ULLockSettingsHelper.Settings.LockAssetUrl, asset, () =>
+				{
+					onLockComplete(true, null);
+				});
 			});
 		}
 
@@ -62,7 +69,10 @@ namespace Alf.UnityLocker.Editor
 				}
 				Debug.Log("Unlocked asset " + asset);
 				sm_lockedAssets.Remove(asset);
-				onUnlockComplete(true, null);
+				UnlockAssetAsync(ULLockSettingsHelper.Settings.UnlockAssetUrl, asset, () =>
+				{
+					onUnlockComplete(true, null);
+				});
 			});
 		}
 
@@ -72,8 +82,14 @@ namespace Alf.UnityLocker.Editor
 			var url = ULLockSettingsHelper.Settings.GetLockedAssetsUrl;
 			FecthLockedAssetsAsync(url, (data) =>
 			{
+				if (string.IsNullOrEmpty(data))
+				{
+					onAssetsFetched?.Invoke();
+					return;
+				}
 				var lockData = JsonConvert.DeserializeObject<ULLockData>(data);
 				sm_lockedAssets = lockData.LockData;
+				HasFetched = true;
 				onAssetsFetched?.Invoke();
 			});
 		}
@@ -116,17 +132,35 @@ namespace Alf.UnityLocker.Editor
 			return false;
 		}
 
+		public static ULUser GetAssetLocker(UnityEngine.Object asset)
+		{
+			return sm_lockedAssets[asset];
+		}
+
 		private static void FecthLockedAssetsAsync(string url, Action<string> onComplete)
 		{
-			// TODO: WebRequest
-			var asset = AssetDatabase.LoadAssetAtPath<TextAsset>(url);
-			if (asset == null)
+			var www = new WWW(url);
+			ULWWWManager.WaitForWWW(www, () =>
 			{
-				Debug.LogError("Asset at url " + url + " is null");
-				onComplete("{}");
-				return;
-			}
-			onComplete(asset.text);
+				onComplete?.Invoke(www.text);
+			});
+		}
+
+		private static void LockAssetAsync(string url, UnityEngine.Object asset, Action onComplete)
+		{
+			var form = new WWWForm();
+			form.AddField("Guid", AssetDatabase.AssetPathToGUID(AssetDatabase.GetAssetPath(asset)));
+			form.AddField("LockerName", ULUserManager.CurrentUser.Name);
+			var www = new WWW(url, form);
+			ULWWWManager.WaitForWWW(www, onComplete);
+		}
+
+		private static void UnlockAssetAsync(string url, UnityEngine.Object asset, Action onComplete)
+		{
+			var form = new WWWForm();
+			form.AddField("Guid", AssetDatabase.AssetPathToGUID(AssetDatabase.GetAssetPath(asset)));
+			var www = new WWW(url, form);
+			ULWWWManager.WaitForWWW(www, onComplete);
 		}
 	}
 }

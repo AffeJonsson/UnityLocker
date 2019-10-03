@@ -23,7 +23,7 @@ namespace Alf.UnityLocker.Editor
 		[MenuItem(LockMenuName, true)]
 		public static bool ValidateLock()
 		{
-			return Selection.activeObject is SceneAsset;
+			return (Selection.activeObject is SceneAsset || PrefabUtility.GetPrefabType(Selection.activeObject) != PrefabType.None) && !ULLocker.IsAssetLocked(Selection.activeObject);
 		}
 
 		[MenuItem(UnlockMenuName)]
@@ -41,7 +41,7 @@ namespace Alf.UnityLocker.Editor
 		[MenuItem(UnlockMenuName, true)]
 		public static bool ValidateUnlock()
 		{
-			return Selection.activeObject is SceneAsset;
+			return (Selection.activeObject is SceneAsset || PrefabUtility.GetPrefabType(Selection.activeObject) != PrefabType.None) && ULLocker.IsAssetLockedByMe(Selection.activeObject);
 		}
 	}
 }
