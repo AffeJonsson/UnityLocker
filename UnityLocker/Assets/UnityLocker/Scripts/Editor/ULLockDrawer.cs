@@ -16,7 +16,31 @@ namespace Alf.UnityLocker.Editor
 			sm_texture = AssetDatabase.LoadAssetAtPath<Texture2D>("Assets/UnityLocker/Assets/lock.png");
 			EditorApplication.projectWindowItemOnGUI += OnProjectWindowItemGUI;
 			EditorApplication.hierarchyWindowItemOnGUI += OnHierarchyWindowItemOnGUI;
+
+			// finishedDefaultHeaderGUI was added in 2018.2
+#if UNITY_2018_2_OR_NEWER
+			UnityEditor.Editor.finishedDefaultHeaderGUI += OnFinishedHeaderGUI;
+#endif
 		}
+
+#if UNITY_2018_2_OR_NEWER
+		private static void OnFinishedHeaderGUI(UnityEditor.Editor editor)
+		{
+			if (!ULLocker.HasFetched)
+			{
+				return;
+			}
+
+			if (editor.serializedObject.targetObject is SceneAsset || PrefabUtility.GetPrefabType(editor.serializedObject.targetObject) != PrefabType.None)
+			{
+				if (ULLocker.IsAssetLocked(editor.serializedObject.targetObject))
+				{
+					GUI.Label(new Rect(9, 9, 14, 14), sm_texture);
+				}
+			}
+		}
+#endif
+
 		private static void OnHierarchyWindowItemOnGUI(int instanceId, Rect selectionRect)
 		{
 			if (!ULLocker.HasFetched)
