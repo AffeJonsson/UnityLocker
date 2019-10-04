@@ -6,6 +6,10 @@ namespace Alf.UnityLocker
 	public sealed class ULLockSettings : ScriptableObject
 	{
 		[SerializeField]
+		private Texture2D m_lockIcon;
+		[SerializeField]
+		private Texture2D m_lockedByMeIcon;
+		[SerializeField]
 		private string m_username;
 		[SerializeField]
 		private string m_baseUrl;
@@ -28,6 +32,16 @@ namespace Alf.UnityLocker
 		public string Username
 		{
 			get { return m_username; }
+		}
+
+		public Texture2D LockIcon
+		{
+			get { return m_lockIcon; }
+		}
+
+		public Texture2D LockedByMeIcon
+		{
+			get { return m_lockedByMeIcon; }
 		}
 	}
 }

@@ -9,13 +9,9 @@ namespace Alf.UnityLocker.Editor
 	public static class ULLockDrawer
 	{
 		private static int sm_currentSceneIndex;
-		private static Texture2D sm_lockTexture;
-		private static Texture2D sm_lockedByMeTexture;
 
 		static ULLockDrawer()
 		{
-			sm_lockTexture = AssetDatabase.LoadAssetAtPath<Texture2D>("Assets/UnityLocker/Assets/lock.png");
-			sm_lockedByMeTexture = AssetDatabase.LoadAssetAtPath<Texture2D>("Assets/UnityLocker/Assets/lock_me.png");
 			EditorApplication.projectWindowItemOnGUI += OnProjectWindowItemGUI;
 			EditorApplication.hierarchyWindowItemOnGUI += OnHierarchyWindowItemOnGUI;
 
@@ -25,7 +21,7 @@ namespace Alf.UnityLocker.Editor
 #endif
 		}
 
-		#if UNITY_2018_2_OR_NEWER
+#if UNITY_2018_2_OR_NEWER
 		private static void OnFinishedHeaderGUI(UnityEditor.Editor editor)
 		{
 			if (!ULLocker.HasFetched)
@@ -35,10 +31,15 @@ namespace Alf.UnityLocker.Editor
 
 			if (editor.serializedObject.targetObject is SceneAsset || PrefabUtility.GetPrefabType(editor.serializedObject.targetObject) != PrefabType.None)
 			{
-				TryDrawLock(new Rect(9, 9, 14, 14), editor.serializedObject.targetObject);
+				var locker = ULLocker.GetAssetLocker(editor.serializedObject.targetObject);
+				if (locker != null)
+				{
+					TryDrawLock(new Rect(9, 9, 14, 14), editor.serializedObject.targetObject);
+					EditorGUILayout.LabelField("Asset locked by " + locker.Name, EditorStyles.boldLabel);
+				}
 			}
 		}
-		#endif
+#endif
 
 		private static void OnHierarchyWindowItemOnGUI(int instanceId, Rect selectionRect)
 		{
@@ -81,11 +82,11 @@ namespace Alf.UnityLocker.Editor
 		{
 			if (ULLocker.IsAssetLockedByMe(asset))
 			{
-				GUI.Label(rect, sm_lockedByMeTexture);
+				GUI.Label(rect, ULLockSettingsHelper.Settings.LockedByMeIcon);
 			}
 			else if (ULLocker.IsAssetLockedBySomeoneElse(asset))
 			{
-				GUI.Label(rect, sm_lockTexture);
+				GUI.Label(rect, ULLockSettingsHelper.Settings.LockIcon);
 			}
 		}
 	}

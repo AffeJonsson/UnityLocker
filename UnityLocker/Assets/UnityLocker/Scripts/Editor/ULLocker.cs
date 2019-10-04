@@ -134,7 +134,12 @@ namespace Alf.UnityLocker.Editor
 
 		public static ULUser GetAssetLocker(UnityEngine.Object asset)
 		{
-			return sm_lockedAssets[asset];
+			ULUser user;
+			if(sm_lockedAssets.TryGetValue(asset, out user))
+			{
+				return user;
+			}
+			return null;
 		}
 
 		private static void FecthLockedAssetsAsync(string url, Action<string> onComplete)

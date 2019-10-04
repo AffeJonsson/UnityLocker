@@ -8,6 +8,11 @@ namespace Alf.UnityLocker.Editor
 	{
 		private static string[] OnWillSaveAssets(string[] paths)
 		{
+			if (!ULLocker.HasFetched)
+			{
+				return new string[0];
+			}
+
 			var pathsLocked = string.Empty;
 			var indexesLocked = new List<int>(8);
 
@@ -26,7 +31,7 @@ namespace Alf.UnityLocker.Editor
 			{
 				return paths;
 			}
-			
+
 			if (paths.Length - indexesLocked.Count > 0)
 			{
 				if (EditorUtility.DisplayDialog("Cannot save some assets", "The following assets are locked:\n" + pathsLocked + "Do you want to save the other assets?", "Yes", "No"))
