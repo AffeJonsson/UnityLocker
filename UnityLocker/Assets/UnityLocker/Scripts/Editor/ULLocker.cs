@@ -1,11 +1,7 @@
-﻿using Newtonsoft.Json;
+﻿using LibGit2Sharp;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Net;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 using UnityEditor;
 using UnityEngine;
 
@@ -135,7 +131,7 @@ namespace Alf.UnityLocker.Editor
 		public static ULUser GetAssetLocker(UnityEngine.Object asset)
 		{
 			ULUser user;
-			if(sm_lockedAssets.TryGetValue(asset, out user))
+			if (sm_lockedAssets.TryGetValue(asset, out user))
 			{
 				return user;
 			}
