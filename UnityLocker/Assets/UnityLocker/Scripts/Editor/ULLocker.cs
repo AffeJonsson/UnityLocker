@@ -45,7 +45,7 @@ namespace Alf.UnityLocker.Editor
 					return;
 				}
 				Debug.Log("Locked asset " + asset);
-				sm_lockedAssets.Add(asset, new ULLockData.AssetLockData(AssetDatabase.AssetPathToGUID(AssetDatabase.GetAssetPath(asset)), ULUserManager.CurrentUser.Name));
+				sm_lockedAssets[asset] = new ULLockData.AssetLockData(AssetDatabase.AssetPathToGUID(AssetDatabase.GetAssetPath(asset)), ULUserManager.CurrentUser.Name);
 				LockAssetAsync(ULLockSettingsHelper.Settings.LockAssetUrl, asset, () =>
 				{
 					onLockComplete(true, null);
