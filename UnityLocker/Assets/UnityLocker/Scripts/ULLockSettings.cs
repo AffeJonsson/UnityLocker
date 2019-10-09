@@ -13,6 +13,8 @@ namespace Alf.UnityLocker
 		private string m_username;
 		[SerializeField]
 		private string m_baseUrl;
+		[SerializeField]
+		private string m_gitRepoPath;
 
 		public string GetLockedAssetsUrl
 		{
@@ -47,6 +49,11 @@ namespace Alf.UnityLocker
 		public Texture2D LockedByMeIcon
 		{
 			get { return m_lockedByMeIcon; }
+		}
+
+		public string GitRepoPath
+		{
+			get { return m_gitRepoPath; }
 		}
 	}
 }

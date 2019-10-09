@@ -10,7 +10,13 @@ namespace Alf.UnityLocker.Editor
 
 		public static bool IsCommitChildOfHead(string sha)
 		{
-			using (var repo = new Repository(@"D:\Git\Repos\UnityLocker"))
+			var repoPath = ULLockSettingsHelper.Settings.GitRepoPath;
+			if (string.IsNullOrEmpty(repoPath))
+			{
+				return false;
+			}
+
+			using (var repo = new Repository(repoPath))
 			{
 				var count = 0;
 				foreach (var commit in repo.Commits)
@@ -30,8 +36,14 @@ namespace Alf.UnityLocker.Editor
 
 		public static string GetShaOfHead()
 		{
+			var repoPath = ULLockSettingsHelper.Settings.GitRepoPath;
+			if (string.IsNullOrEmpty(repoPath))
+			{
+				return string.Empty;
+			}
+
 			var sha = string.Empty;
-			using (var repo = new Repository(@"D:\Git\Repos\UnityLocker"))
+			using (var repo = new Repository(repoPath))
 			{
 				sha = repo.Head.Tip.Sha;
 			}
