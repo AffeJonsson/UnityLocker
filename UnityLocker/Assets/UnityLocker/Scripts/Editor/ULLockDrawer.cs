@@ -31,11 +31,14 @@ namespace Alf.UnityLocker.Editor
 
 			if (editor.serializedObject.targetObject is SceneAsset || PrefabUtility.GetPrefabType(editor.serializedObject.targetObject) != PrefabType.None)
 			{
-				var locker = ULLocker.GetAssetLocker(editor.serializedObject.targetObject);
-				if (locker != null)
+				if (ULLocker.IsAssetLocked(editor.serializedObject.targetObject))
 				{
-					TryDrawLock(new Rect(9, 9, 14, 14), editor.serializedObject.targetObject);
-					EditorGUILayout.LabelField("Asset locked by " + locker.Name, EditorStyles.boldLabel);
+					var locker = ULLocker.GetAssetLocker(editor.serializedObject.targetObject);
+					if (locker != null)
+					{
+						TryDrawLock(new Rect(9, 9, 14, 14), editor.serializedObject.targetObject);
+						EditorGUILayout.LabelField("Asset locked by " + locker.Name, EditorStyles.boldLabel);
+					}
 				}
 			}
 		}
