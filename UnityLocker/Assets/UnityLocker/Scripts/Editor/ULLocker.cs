@@ -162,20 +162,15 @@ namespace Alf.UnityLocker.Editor
 			}
 			return null;
 		}
-
-		public static Commit GetAssetUnlockCommit(UnityEngine.Object asset)
+		
+		public static string GetAssetUnlockCommitSha(UnityEngine.Object asset)
 		{
 			ULLockData.AssetLockData lockData;
 			if (sm_lockedAssets.TryGetValue(asset, out lockData))
 			{
-				if (string.IsNullOrEmpty(lockData.UnlockSha))
-				{
-					return null;
-				}
-
-				return ULGitHandler.GetCommitFromSha(lockData.UnlockSha);
+				return lockData.UnlockSha ?? string.Empty;
 			}
-			return null;
+			return string.Empty;
 		}
 
 		private static void FecthLockedAssetsAsync(string url, Action<string> onComplete)

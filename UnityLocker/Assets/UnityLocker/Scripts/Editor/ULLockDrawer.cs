@@ -37,13 +37,12 @@ namespace Alf.UnityLocker.Editor
 					if (locker != null)
 					{
 						TryDrawLock(new Rect(9, 9, 14, 14), editor.serializedObject.targetObject);
-						var lockText = "Asset locked by " + locker.Name;
-						var commit = ULLocker.GetAssetUnlockCommit(editor.serializedObject.targetObject);
-						if (commit != null)
+						EditorGUILayout.LabelField("Asset locked by " + locker.Name, EditorStyles.boldLabel);
+						var sha = ULLocker.GetAssetUnlockCommitSha(editor.serializedObject.targetObject);
+						if (!string.IsNullOrEmpty(sha))
 						{
-							lockText += "\n(Unlocked at commit " + commit.Sha.Substring(0, 8) + " [" + commit.MessageShort + "])";
+							EditorGUILayout.LabelField("(Unlocked at commit " + sha.Substring(0, 8) + ")");
 						}
-						EditorGUILayout.LabelField(lockText, EditorStyles.boldLabel);
 					}
 				}
 			}
