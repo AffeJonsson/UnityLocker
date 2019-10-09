@@ -19,13 +19,23 @@ namespace Alf.UnityLocker.Editor
 					{
 						return false;
 					}
-					if (commit.Sha.StartsWith(sha))
+					if (commit.Sha == sha)
 					{
 						return true;
 					}
 				}
 			}
 			return false;
+		}
+
+		public static Commit GetCommitFromSha(string sha)
+		{
+			Commit commit;
+			using (var repo = new Repository(@"D:\Git\Repos\UnityLocker"))
+			{
+				commit = repo.Lookup<Commit>(sha);
+			}
+			return commit;
 		}
 
 		public static string GetShaOfHead()
