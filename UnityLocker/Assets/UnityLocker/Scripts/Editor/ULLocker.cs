@@ -78,6 +78,7 @@ namespace Alf.UnityLocker.Editor
 			{
 				if (!IsAssetLockedByMe(asset))
 				{
+
 					Debug.Log("Asset " + asset + " is not locked by you!");
 					onUnlockComplete(false, "Asset is not locked by you, it's locked by " + sm_lockedAssets[asset].LockerName);
 					return;
