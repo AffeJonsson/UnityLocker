@@ -29,6 +29,11 @@ namespace Alf.UnityLocker
 			get { return m_baseUrl + "/unlock-asset"; }
 		}
 
+		public string UnlockAssetAtCommitUrl
+		{
+			get { return m_baseUrl + "/unlock-asset-at-commit"; }
+		}
+
 		public string Username
 		{
 			get { return m_username; }

@@ -13,15 +13,30 @@ namespace Alf.UnityLocker.Editor
 		{
 			public string Guid;
 			public string LockerName;
+			public string UnlockSha;
+
+			public AssetLockData(string guid, string lockerName)
+			{
+				Guid = guid;
+				LockerName = lockerName;
+				UnlockSha = null;
+			}
+
+			public AssetLockData(string guid, string lockerName, string unlockSha)
+			{
+				Guid = guid;
+				LockerName = lockerName;
+				UnlockSha = unlockSha;
+			}
 		}
 
-		public readonly Dictionary<UnityEngine.Object, ULUser> LockData;
+		public readonly Dictionary<UnityEngine.Object, AssetLockData> LockData;
 
 		public ULLockData(AssetLockData[] rawLockData)
 		{
-			if(LockData == null)
+			if (LockData == null)
 			{
-				LockData = new Dictionary<UnityEngine.Object, ULUser>(rawLockData.Length);
+				LockData = new Dictionary<UnityEngine.Object, AssetLockData>(rawLockData.Length);
 			}
 			else
 			{
@@ -36,7 +51,7 @@ namespace Alf.UnityLocker.Editor
 					continue;
 				}
 				var asset = AssetDatabase.LoadAssetAtPath<UnityEngine.Object>(assetPath);
-				LockData[asset] = ULUserManager.GetUser(data.LockerName);
+				LockData[asset] = data;
 			}
 		}
 	}
