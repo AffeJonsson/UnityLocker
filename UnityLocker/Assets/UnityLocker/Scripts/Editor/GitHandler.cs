@@ -1,16 +1,14 @@
 ﻿using LibGit2Sharp;
-using System;
-using UnityEngine;
 
 namespace Alf.UnityLocker.Editor
 {
-	public static class ULGitHandler
+	public class GitHandler : IVersionControlHandler
 	{
 		private const int MaxCommitBacktrack = 500;
 
-		public static bool IsCommitChildOfHead(string sha)
+		public bool IsCommitChildOfHead(string sha)
 		{
-			var repoPath = ULLockSettingsHelper.Settings.GitRepoPath;
+			var repoPath = Container.LockSettings.RepoPath;
 			if (string.IsNullOrEmpty(repoPath))
 			{
 				return false;
@@ -34,9 +32,9 @@ namespace Alf.UnityLocker.Editor
 			return false;
 		}
 
-		public static string GetShaOfHead()
+		public string GetShaOfHead()
 		{
-			var repoPath = ULLockSettingsHelper.Settings.GitRepoPath;
+			var repoPath = Container.LockSettings.RepoPath;
 			if (string.IsNullOrEmpty(repoPath))
 			{
 				return string.Empty;

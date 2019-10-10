@@ -4,11 +4,11 @@ using UnityEditor;
 
 namespace Alf.UnityLocker.Editor
 {
-	public class ULSaveChecker : UnityEditor.AssetModificationProcessor
+	public class SaveChecker : UnityEditor.AssetModificationProcessor
 	{
 		private static string[] OnWillSaveAssets(string[] paths)
 		{
-			if (!ULLocker.HasFetched)
+			if (!Locker.HasFetched)
 			{
 				return new string[0];
 			}
@@ -19,9 +19,9 @@ namespace Alf.UnityLocker.Editor
 			for (var i = 0; i < paths.Length; i++)
 			{
 				var asset = AssetDatabase.LoadAssetAtPath<UnityEngine.Object>(paths[i]);
-				if (asset != null && ULLocker.IsAssetLockedBySomeoneElse(asset))
+				if (asset != null && Locker.IsAssetLockedBySomeoneElse(asset))
 				{
-					pathsLocked += paths[i] + " (" + ULLocker.GetAssetLocker(asset).Name + ")\n";
+					pathsLocked += paths[i] + " (" + Locker.GetAssetLocker(asset) + ")\n";
 					indexesLocked.Add(i);
 				}
 			}

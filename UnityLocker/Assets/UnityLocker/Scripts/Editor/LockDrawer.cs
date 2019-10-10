@@ -6,11 +6,11 @@ using UnityEditor.SceneManagement;
 namespace Alf.UnityLocker.Editor
 {
 	[InitializeOnLoad]
-	public static class ULLockDrawer
+	public static class LockDrawer
 	{
 		private static int sm_currentSceneIndex;
 
-		static ULLockDrawer()
+		static LockDrawer()
 		{
 			EditorApplication.projectWindowItemOnGUI += OnProjectWindowItemGUI;
 			EditorApplication.hierarchyWindowItemOnGUI += OnHierarchyWindowItemOnGUI;
@@ -24,21 +24,21 @@ namespace Alf.UnityLocker.Editor
 #if UNITY_2018_2_OR_NEWER
 		private static void OnFinishedHeaderGUI(UnityEditor.Editor editor)
 		{
-			if (!ULLocker.HasFetched)
+			if (!Locker.HasFetched)
 			{
 				return;
 			}
 
 			if (editor.serializedObject.targetObject is SceneAsset || PrefabUtility.GetPrefabType(editor.serializedObject.targetObject) != PrefabType.None)
 			{
-				if (ULLocker.IsAssetLocked(editor.serializedObject.targetObject))
+				if (Locker.IsAssetLocked(editor.serializedObject.targetObject))
 				{
-					var locker = ULLocker.GetAssetLocker(editor.serializedObject.targetObject);
+					var locker = Locker.GetAssetLocker(editor.serializedObject.targetObject);
 					if (locker != null)
 					{
 						TryDrawLock(new Rect(9, 9, 14, 14), editor.serializedObject.targetObject);
-						EditorGUILayout.LabelField("Asset locked by " + locker.Name, EditorStyles.boldLabel);
-						var sha = ULLocker.GetAssetUnlockCommitSha(editor.serializedObject.targetObject);
+						EditorGUILayout.LabelField("Asset locked by " + locker, EditorStyles.boldLabel);
+						var sha = Locker.GetAssetUnlockCommitSha(editor.serializedObject.targetObject);
 						if (!string.IsNullOrEmpty(sha))
 						{
 							EditorGUILayout.LabelField("(Unlocked at commit " + sha.Substring(0, 8) + ")");
@@ -51,7 +51,7 @@ namespace Alf.UnityLocker.Editor
 
 		private static void OnHierarchyWindowItemOnGUI(int instanceId, Rect selectionRect)
 		{
-			if (!ULLocker.HasFetched)
+			if (!Locker.HasFetched)
 			{
 				return;
 			}
@@ -72,7 +72,7 @@ namespace Alf.UnityLocker.Editor
 
 		private static void OnProjectWindowItemGUI(string guid, Rect selectionRect)
 		{
-			if (!ULLocker.HasFetched)
+			if (!Locker.HasFetched)
 			{
 				return;
 			}
@@ -88,13 +88,13 @@ namespace Alf.UnityLocker.Editor
 
 		private static void TryDrawLock(Rect rect, Object asset)
 		{
-			if (ULLocker.IsAssetLockedByMe(asset))
+			if (Locker.IsAssetLockedByMe(asset))
 			{
-				GUI.Label(rect, ULLockSettingsHelper.Settings.LockedByMeIcon);
+				GUI.Label(rect, Container.LockSettings.LockedByMeIcon);
 			}
-			else if (ULLocker.IsAssetLockedBySomeoneElse(asset))
+			else if (Locker.IsAssetLockedBySomeoneElse(asset))
 			{
-				GUI.Label(rect, ULLockSettingsHelper.Settings.LockIcon);
+				GUI.Label(rect, Container.LockSettings.LockIcon);
 			}
 		}
 	}

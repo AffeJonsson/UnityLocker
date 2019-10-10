@@ -6,7 +6,7 @@ using UnityEngine;
 namespace Alf.UnityLocker.Editor
 {
 	[Serializable]
-	public class ULLockData
+	public sealed class LockedAssetsData
 	{
 		[Serializable]
 		public struct AssetLockData
@@ -32,7 +32,7 @@ namespace Alf.UnityLocker.Editor
 
 		public readonly Dictionary<UnityEngine.Object, AssetLockData> LockData;
 
-		public ULLockData(AssetLockData[] rawLockData)
+		public LockedAssetsData(AssetLockData[] rawLockData)
 		{
 			if (LockData == null)
 			{

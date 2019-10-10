@@ -2,8 +2,7 @@
 
 namespace Alf.UnityLocker
 {
-	[CreateAssetMenu(fileName = "ULLockSettings")]
-	public sealed class ULLockSettings : ScriptableObject
+	public sealed class LockSettings : ScriptableObject
 	{
 		[SerializeField]
 		private Texture2D m_lockIcon;
@@ -14,7 +13,7 @@ namespace Alf.UnityLocker
 		[SerializeField]
 		private string m_baseUrl;
 		[SerializeField]
-		private string m_gitRepoPath;
+		private VersionControlType m_versionControlType;
 
 		public string GetLockedAssetsUrl
 		{
@@ -51,9 +50,14 @@ namespace Alf.UnityLocker
 			get { return m_lockedByMeIcon; }
 		}
 
-		public string GitRepoPath
+		public string RepoPath
 		{
-			get { return m_gitRepoPath; }
+			get { return System.IO.Path.GetFullPath(System.IO.Path.Combine(Application.dataPath, @"..\..\")).TrimEnd('\\'); }
+		}
+
+		public VersionControlType VersionControlType
+		{
+			get { return m_versionControlType; }
 		}
 	}
 }

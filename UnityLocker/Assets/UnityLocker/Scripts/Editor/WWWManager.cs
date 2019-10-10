@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace Alf.UnityLocker.Editor
 {
-	public static class ULWWWManager
+	public sealed class WWWManager
 	{
 		private struct WWWAction
 		{
@@ -19,9 +19,9 @@ namespace Alf.UnityLocker.Editor
 			}
 		}
 
-		private static List<WWWAction> sm_wwwActions = new List<WWWAction>(4);
+		private List<WWWAction> sm_wwwActions = new List<WWWAction>(4);
 
-		public static void WaitForWWW(WWW www, Action onComplete)
+		public void WaitForWWW(WWW www, Action onComplete)
 		{
 			if (sm_wwwActions.Count == 0)
 			{
@@ -30,7 +30,7 @@ namespace Alf.UnityLocker.Editor
 			sm_wwwActions.Add(new WWWAction(www, onComplete));
 		}
 
-		private static void Update()
+		private void Update()
 		{
 			for (var i = sm_wwwActions.Count - 1; i >= 0; i--)
 			{
