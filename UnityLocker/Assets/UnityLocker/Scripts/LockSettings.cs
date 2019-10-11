@@ -13,7 +13,7 @@ namespace Alf.UnityLocker
 		[SerializeField]
 		private string m_baseUrl;
 		[SerializeField]
-		private VersionControlType m_versionControlType;
+		private string m_versionControlName;
 
 		public string GetLockedAssetsUrl
 		{
@@ -55,9 +55,17 @@ namespace Alf.UnityLocker
 			get { return System.IO.Path.GetFullPath(System.IO.Path.Combine(Application.dataPath, @"..\..\")).TrimEnd('\\'); }
 		}
 
-		public VersionControlType VersionControlType
+		public string VersionControlName
 		{
-			get { return m_versionControlType; }
+			get { return m_versionControlName; }
+		}
+
+		public bool IsSetUp
+		{
+			get
+			{
+				return VersionControlName != null && m_baseUrl != null;
+			}
 		}
 	}
 }

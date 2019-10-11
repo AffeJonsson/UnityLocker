@@ -55,11 +55,11 @@ namespace Alf.UnityLocker.Editor
 			{
 				return;
 			}
-
-			HierarchyProperty.FilterSingleSceneObject(instanceId, false);
+			
 			var asset = EditorUtility.InstanceIDToObject(instanceId);
 			if (asset == null)
 			{
+				Debug.Log(instanceId);
 				var scene = UnityEngine.SceneManagement.SceneManager.GetSceneAt(sm_currentSceneIndex++);
 				if (sm_currentSceneIndex >= UnityEngine.SceneManagement.SceneManager.sceneCount)
 				{
@@ -90,11 +90,11 @@ namespace Alf.UnityLocker.Editor
 		{
 			if (Locker.IsAssetLockedByMe(asset))
 			{
-				GUI.Label(rect, Container.LockSettings.LockedByMeIcon);
+				GUI.Label(rect, Container.GetLockSettings().LockedByMeIcon);
 			}
 			else if (Locker.IsAssetLockedBySomeoneElse(asset))
 			{
-				GUI.Label(rect, Container.LockSettings.LockIcon);
+				GUI.Label(rect, Container.GetLockSettings().LockIcon);
 			}
 		}
 	}

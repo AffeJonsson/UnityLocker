@@ -1,4 +1,4 @@
-﻿namespace Alf.UnityLocker.Editor
+﻿namespace Alf.UnityLocker.Editor.VersionControlHandlers
 {
 	public interface IVersionControlHandler
 	{

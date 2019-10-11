@@ -44,8 +44,8 @@ namespace Alf.UnityLocker.Editor
 					return;
 				}
 				Debug.Log("Locked asset " + asset);
-				sm_lockedAssets[asset] = new LockedAssetsData.AssetLockData(AssetDatabase.AssetPathToGUID(AssetDatabase.GetAssetPath(asset)), Container.LockSettings.Username);
-				LockAssetAsync(Container.LockSettings.LockAssetUrl, asset, () =>
+				sm_lockedAssets[asset] = new LockedAssetsData.AssetLockData(AssetDatabase.AssetPathToGUID(AssetDatabase.GetAssetPath(asset)), Container.GetLockSettings().Username);
+				LockAssetAsync(Container.GetLockSettings().LockAssetUrl, asset, () =>
 				{
 					onLockComplete(true, null);
 				});
@@ -64,7 +64,7 @@ namespace Alf.UnityLocker.Editor
 				}
 				Debug.Log("Unlocked asset " + asset);
 				sm_lockedAssets.Remove(asset);
-				UnlockAssetAsync(Container.LockSettings.UnlockAssetUrl, asset, () =>
+				UnlockAssetAsync(Container.GetLockSettings().UnlockAssetUrl, asset, () =>
 				{
 					onUnlockComplete(true, null);
 				});
@@ -84,7 +84,7 @@ namespace Alf.UnityLocker.Editor
 				}
 				Debug.Log("Unlocked asset " + asset + " at current commit");
 				sm_lockedAssets.Remove(asset);
-				UnlockAssetAtCurrentCommitAsync(Container.LockSettings.UnlockAssetAtCommitUrl, asset, () =>
+				UnlockAssetAtCurrentCommitAsync(Container.GetLockSettings().UnlockAssetAtCommitUrl, asset, () =>
 				{
 					onUnlockComplete(true, null);
 				});
@@ -94,7 +94,7 @@ namespace Alf.UnityLocker.Editor
 		public static void FetchLockedAssets(Action onAssetsFetched)
 		{
 			sm_nextFetchTime = Time.realtimeSinceStartup + TimeBetweenFetches;
-			var url = Container.LockSettings.GetLockedAssetsUrl;
+			var url = Container.GetLockSettings().GetLockedAssetsUrl;
 			FecthLockedAssetsAsync(url, (data) =>
 			{
 				if (string.IsNullOrEmpty(data))
@@ -127,7 +127,7 @@ namespace Alf.UnityLocker.Editor
 			LockedAssetsData.AssetLockData lockData;
 			if (sm_lockedAssets.TryGetValue(asset, out lockData))
 			{
-				return string.IsNullOrEmpty(lockData.UnlockSha) || !Container.VersionControlHandler.IsCommitChildOfHead(lockData.UnlockSha);
+				return string.IsNullOrEmpty(lockData.UnlockSha) || !Container.GetVersionControlHandler().IsCommitChildOfHead(lockData.UnlockSha);
 			}
 			return false;
 		}
@@ -137,7 +137,7 @@ namespace Alf.UnityLocker.Editor
 			LockedAssetsData.AssetLockData lockData;
 			if (sm_lockedAssets.TryGetValue(asset, out lockData))
 			{
-				return (string.IsNullOrEmpty(lockData.UnlockSha) || !Container.VersionControlHandler.IsCommitChildOfHead(lockData.UnlockSha)) && lockData.LockerName == Container.LockSettings.Username;
+				return (string.IsNullOrEmpty(lockData.UnlockSha) || !Container.GetVersionControlHandler().IsCommitChildOfHead(lockData.UnlockSha)) && lockData.LockerName == Container.GetLockSettings().Username;
 			}
 			return false;
 		}
@@ -147,7 +147,7 @@ namespace Alf.UnityLocker.Editor
 			LockedAssetsData.AssetLockData lockData;
 			if (sm_lockedAssets.TryGetValue(asset, out lockData))
 			{
-				return (string.IsNullOrEmpty(lockData.UnlockSha) || !Container.VersionControlHandler.IsCommitChildOfHead(lockData.UnlockSha)) && lockData.LockerName != Container.LockSettings.Username;
+				return (string.IsNullOrEmpty(lockData.UnlockSha) || !Container.GetVersionControlHandler().IsCommitChildOfHead(lockData.UnlockSha)) && lockData.LockerName != Container.GetLockSettings().Username;
 			}
 			return false;
 		}
@@ -175,7 +175,7 @@ namespace Alf.UnityLocker.Editor
 		private static void FecthLockedAssetsAsync(string url, Action<string> onComplete)
 		{
 			var www = new WWW(url);
-			Container.WWWManager.WaitForWWW(www, () =>
+			Container.GetWWWManager().WaitForWWW(www, () =>
 			{
 				onComplete?.Invoke(www.text);
 			});
@@ -185,9 +185,9 @@ namespace Alf.UnityLocker.Editor
 		{
 			var form = new WWWForm();
 			form.AddField("Guid", AssetDatabase.AssetPathToGUID(AssetDatabase.GetAssetPath(asset)));
-			form.AddField("LockerName", Container.LockSettings.Username);
+			form.AddField("LockerName", Container.GetLockSettings().Username);
 			var www = new WWW(url, form);
-			Container.WWWManager.WaitForWWW(www, onComplete);
+			Container.GetWWWManager().WaitForWWW(www, onComplete);
 		}
 
 		private static void UnlockAssetAsync(string url, UnityEngine.Object asset, Action onComplete)
@@ -195,16 +195,16 @@ namespace Alf.UnityLocker.Editor
 			var form = new WWWForm();
 			form.AddField("Guid", AssetDatabase.AssetPathToGUID(AssetDatabase.GetAssetPath(asset)));
 			var www = new WWW(url, form);
-			Container.WWWManager.WaitForWWW(www, onComplete);
+			Container.GetWWWManager().WaitForWWW(www, onComplete);
 		}
 
 		private static void UnlockAssetAtCurrentCommitAsync(string url, UnityEngine.Object asset, Action onComplete)
 		{
 			var form = new WWWForm();
 			form.AddField("Guid", AssetDatabase.AssetPathToGUID(AssetDatabase.GetAssetPath(asset)));
-			form.AddField("Sha", Container.VersionControlHandler.GetShaOfHead());
+			form.AddField("Sha", Container.GetVersionControlHandler().GetShaOfHead());
 			var www = new WWW(url, form);
-			Container.WWWManager.WaitForWWW(www, onComplete);
+			Container.GetWWWManager().WaitForWWW(www, onComplete);
 		}
 	}
 }

@@ -10,6 +10,14 @@ namespace Alf.UnityLocker.Editor
 		{
 			if (!Locker.HasFetched)
 			{
+				for (var i = 0; i < paths.Length; i++)
+				{
+					if (paths[i] == AssetDatabase.GetAssetPath(Container.GetLockSettings()))
+					{
+						return new[] { paths[i] };
+					}
+				}
+				EditorUtility.DisplayDialog("Could not save assets", "The UnityLocker plugin has not yet fetched locket assets from the server.\nMake sure the LockSettings asset is configured correctly and that the server is up and running.", "Ok");
 				return new string[0];
 			}
 
