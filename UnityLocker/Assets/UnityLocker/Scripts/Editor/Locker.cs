@@ -106,6 +106,8 @@ namespace Alf.UnityLocker.Editor
 				sm_lockedAssets = lockData.LockData;
 				HasFetched = true;
 				onAssetsFetched?.Invoke();
+				EditorApplication.RepaintHierarchyWindow();
+				EditorApplication.RepaintProjectWindow();
 			});
 		}
 

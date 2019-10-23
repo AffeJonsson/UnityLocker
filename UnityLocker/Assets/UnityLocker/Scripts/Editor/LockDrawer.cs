@@ -55,19 +55,12 @@ namespace Alf.UnityLocker.Editor
 			{
 				return;
 			}
-			
+
 			var asset = EditorUtility.InstanceIDToObject(instanceId);
-			if (asset == null)
+			if (asset != null)
 			{
-				Debug.Log(instanceId);
-				var scene = UnityEngine.SceneManagement.SceneManager.GetSceneAt(sm_currentSceneIndex++);
-				if (sm_currentSceneIndex >= UnityEngine.SceneManagement.SceneManager.sceneCount)
-				{
-					sm_currentSceneIndex = 0;
-				}
-				asset = AssetDatabase.LoadAssetAtPath<Object>(scene.path);
+				TryDrawLock(selectionRect, asset);
 			}
-			TryDrawLock(selectionRect, asset);
 		}
 
 		private static void OnProjectWindowItemGUI(string guid, Rect selectionRect)
@@ -94,7 +87,15 @@ namespace Alf.UnityLocker.Editor
 			}
 			else if (Locker.IsAssetLockedBySomeoneElse(asset))
 			{
-				GUI.Label(rect, Container.GetLockSettings().LockIcon);
+				var sha = Locker.GetAssetUnlockCommitSha(asset);
+				if (!string.IsNullOrEmpty(sha))
+				{
+					GUI.Label(rect, Container.GetLockSettings().LockedNowButUnlockedLaterIcon);
+				}
+				else
+				{
+					GUI.Label(rect, Container.GetLockSettings().LockIcon);
+				}
 			}
 		}
 	}

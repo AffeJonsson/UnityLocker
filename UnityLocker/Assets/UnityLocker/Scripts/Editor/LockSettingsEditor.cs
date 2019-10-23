@@ -39,6 +39,7 @@ namespace Alf.UnityLocker.Editor
 			serializedObject.Update();
 			EditorGUILayout.PropertyField(serializedObject.FindProperty("m_lockIcon"));
 			EditorGUILayout.PropertyField(serializedObject.FindProperty("m_lockedByMeIcon"));
+			EditorGUILayout.PropertyField(serializedObject.FindProperty("m_lockedNowButUnlockedLaterIcon"));
 			EditorGUILayout.PropertyField(serializedObject.FindProperty("m_baseUrl"));
 
 			var usernameProperty = serializedObject.FindProperty("m_username");
