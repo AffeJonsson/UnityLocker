@@ -11,8 +11,6 @@ namespace Alf.UnityLocker
 		[SerializeField]
 		private Texture2D m_lockedNowButUnlockedLaterIcon;
 		[SerializeField]
-		private string m_username;
-		[SerializeField]
 		private string m_baseUrl;
 		[SerializeField]
 		private string m_versionControlName;
@@ -39,7 +37,7 @@ namespace Alf.UnityLocker
 
 		public string Username
 		{
-			get { return m_username; }
+			get { return System.Environment.UserName; }
 		}
 
 		public Texture2D LockIcon

@@ -14,7 +14,7 @@ namespace Alf.UnityLocker.Editor.VersionControlHandlers
 			{
 				return false;
 			}
-
+			
 			using (var repo = new Repository(repoPath))
 			{
 				var count = 0;

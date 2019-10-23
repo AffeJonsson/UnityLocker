@@ -42,12 +42,6 @@ namespace Alf.UnityLocker.Editor
 			EditorGUILayout.PropertyField(serializedObject.FindProperty("m_lockedNowButUnlockedLaterIcon"));
 			EditorGUILayout.PropertyField(serializedObject.FindProperty("m_baseUrl"));
 
-			var usernameProperty = serializedObject.FindProperty("m_username");
-			if (string.IsNullOrEmpty(usernameProperty.stringValue))
-			{
-				serializedObject.FindProperty("m_username").stringValue = Environment.UserName;
-			}
-
 			if (sm_attributes == null || sm_attributes.Count == 0)
 			{
 				GUI.enabled = false;
