@@ -51,7 +51,10 @@ namespace Alf.UnityLocker.Editor
 					continue;
 				}
 				var asset = AssetDatabase.LoadAssetAtPath<UnityEngine.Object>(assetPath);
-				LockData[asset] = data;
+				if (asset != null)
+				{
+					LockData[asset] = data;
+				}
 			}
 		}
 	}
