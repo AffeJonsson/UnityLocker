@@ -17,3 +17,5 @@ MonoBehaviour:
     type: 3}
   m_baseUrl: localhost:5000
   m_versionControlName: Git
+  m_baseFolderAdditionalPath: ..\..\
+  m_parentFolderCount: 2

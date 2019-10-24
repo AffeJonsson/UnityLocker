@@ -47,7 +47,6 @@ namespace Alf.UnityLocker.Editor
 				var assetPath = AssetDatabase.GUIDToAssetPath(data.Guid);
 				if (string.IsNullOrEmpty(assetPath))
 				{
-					Debug.LogError("Asset with GUID " + data.Guid + ", locked by " + data.LockerName + ", was not found");
 					continue;
 				}
 				var asset = AssetDatabase.LoadAssetAtPath<UnityEngine.Object>(assetPath);
