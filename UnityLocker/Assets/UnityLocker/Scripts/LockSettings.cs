@@ -14,6 +14,10 @@ namespace Alf.UnityLocker
 		private string m_baseUrl;
 		[SerializeField]
 		private string m_versionControlName;
+		[SerializeField]
+		private string m_baseFolderAdditionalPath;
+		[SerializeField]
+		private int m_parentFolderCount;
 
 		public string GetLockedAssetsUrl
 		{
@@ -57,7 +61,7 @@ namespace Alf.UnityLocker
 
 		public string RepoPath
 		{
-			get { return System.IO.Path.GetFullPath(System.IO.Path.Combine(Application.dataPath, @"..\..\")).TrimEnd('\\'); }
+			get { return System.IO.Path.GetFullPath(System.IO.Path.Combine(Application.dataPath, m_baseFolderAdditionalPath)).TrimEnd('\\'); }
 		}
 
 		public string VersionControlName

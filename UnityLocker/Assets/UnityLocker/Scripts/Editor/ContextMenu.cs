@@ -59,7 +59,7 @@ namespace Alf.UnityLocker.Editor
 		[MenuItem(UnlockFromCurrentCommitMenuName, true)]
 		public static bool ValidateUnlockFromCurrentCommit()
 		{
-			return (Selection.activeObject is SceneAsset || PrefabUtility.GetPrefabType(Selection.activeObject) != PrefabType.None) && Locker.IsAssetLockedByMe(Selection.activeObject);
+			return Container.GetLockSettings().VersionControlName != "None" && (Selection.activeObject is SceneAsset || PrefabUtility.GetPrefabType(Selection.activeObject) != PrefabType.None) && Locker.IsAssetLockedByMe(Selection.activeObject);
 		}
 	}
 }

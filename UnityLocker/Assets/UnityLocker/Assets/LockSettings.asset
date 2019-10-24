@@ -11,8 +11,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a11c548d67fe0814fb186921569cd5fa, type: 3}
   m_Name: LockSettings
   m_EditorClassIdentifier: 
-  m_lockIcon: {fileID: 2800000, guid: 2086ebc6ab6d352459755a832a591284, type: 3}
+  m_lockIcon: {fileID: 2800000, guid: 09d79424204bc0a47b0cfafef7e41597, type: 3}
   m_lockedByMeIcon: {fileID: 2800000, guid: 70f4b5f785f5ddf488cf2213788d3497, type: 3}
-  m_username: Alfred
+  m_lockedNowButUnlockedLaterIcon: {fileID: 2800000, guid: c04bf6af44421534ebf51e91e54fab30,
+    type: 3}
   m_baseUrl: localhost:5000
   m_versionControlName: Git
