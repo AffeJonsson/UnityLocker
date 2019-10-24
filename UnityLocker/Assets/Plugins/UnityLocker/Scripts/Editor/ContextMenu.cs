@@ -7,6 +7,7 @@ namespace Alf.UnityLocker.Editor
 		private const string LockMenuName = "Assets/UnityLocker/Lock";
 		private const string UnlockMenuName = "Assets/UnityLocker/Unlock (Globally)";
 		private const string UnlockFromCurrentCommitMenuName = "Assets/UnityLocker/Unlock (From current commit)";
+		private const string OpenSettingsFileMenuName = "Assets/UnityLocker/Open Settings File";
 
 		[MenuItem(LockMenuName)]
 		public static void Lock()
@@ -60,6 +61,12 @@ namespace Alf.UnityLocker.Editor
 		public static bool ValidateUnlockFromCurrentCommit()
 		{
 			return Container.GetLockSettings().VersionControlName != "None" && (Selection.activeObject is SceneAsset || PrefabUtility.GetPrefabType(Selection.activeObject) != PrefabType.None) && Locker.IsAssetLockedByMe(Selection.activeObject);
+		}
+
+		[MenuItem(OpenSettingsFileMenuName, priority = 10000)]
+		public static void OpenSettingsFile()
+		{
+			Selection.activeObject = Container.GetLockSettings();
 		}
 	}
 }
