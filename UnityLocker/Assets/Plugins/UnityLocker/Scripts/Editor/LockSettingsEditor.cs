@@ -1,6 +1,8 @@
-﻿using Alf.UnityLocker.Editor.VersionControlHandlers;
+﻿using Alf.UnityLocker.Editor.AssetTypeValidators;
+using Alf.UnityLocker.Editor.VersionControlHandlers;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using UnityEditor;
 using UnityEngine;
@@ -10,15 +12,18 @@ namespace Alf.UnityLocker.Editor
 	[CustomEditor(typeof(LockSettings))]
 	public class LockSettingsEditor : UnityEditor.Editor
 	{
-		private static List<string> sm_attributes;
+		private static List<string> sm_versionControllers;
+		private static List<string> sm_assetTypeValidatorNames;
 
 		private void OnEnable()
 		{
-			if (sm_attributes != null)
+			if (sm_versionControllers != null && sm_assetTypeValidatorNames != null)
 			{
 				return;
 			}
-			sm_attributes = new List<string>(4);
+			sm_versionControllers = new List<string>(4);
+			var assetValidators = new Dictionary<string, int>();
+			
 			var assemblies = AppDomain.CurrentDomain.GetAssemblies();
 			for (var i = 0; i < assemblies.Length; i++)
 			{
@@ -28,10 +33,17 @@ namespace Alf.UnityLocker.Editor
 					var vcAttribute = types[j].GetCustomAttribute<VersionControlHandlerAttribute>();
 					if (vcAttribute != null)
 					{
-						sm_attributes.Add(vcAttribute.Name);
+						sm_versionControllers.Add(vcAttribute.Name);
+					}
+					var atAttribute = types[j].GetCustomAttribute<AssetTypeValidatorAttribute>();
+					if (atAttribute != null)
+					{
+						assetValidators.Add(atAttribute.Name, atAttribute.Flag);
 					}
 				}
 			}
+			
+			sm_assetTypeValidatorNames = assetValidators.Keys.OrderBy(n => assetValidators[n]).ToList();
 		}
 
 		public override void OnInspectorGUI()
@@ -65,7 +77,7 @@ namespace Alf.UnityLocker.Editor
 				EditorGUILayout.LabelField("Repo folder: " + (target as LockSettings).RepoPath, EditorStyles.miniLabel);
 			}
 
-			if (sm_attributes == null || sm_attributes.Count == 0)
+			if (sm_versionControllers == null || sm_versionControllers.Count == 0)
 			{
 				GUI.enabled = false;
 				EditorGUILayout.Popup("Version Control", 0, new string[0]);
@@ -74,16 +86,30 @@ namespace Alf.UnityLocker.Editor
 			else
 			{
 				var property = serializedObject.FindProperty("m_versionControlName");
-				var currentIndex = sm_attributes.IndexOf(property.stringValue);
+				var currentIndex = sm_versionControllers.IndexOf(property.stringValue);
 				using (var changeCheck = new EditorGUI.ChangeCheckScope())
 				{
-					var newIndex = EditorGUILayout.Popup("Version Control", currentIndex, sm_attributes.ToArray());
+					var newIndex = EditorGUILayout.Popup("Version Control", currentIndex, sm_versionControllers.ToArray());
 					if (changeCheck.changed)
 					{
-						property.stringValue = sm_attributes[newIndex];
+						property.stringValue = sm_versionControllers[newIndex];
 					}
 				}
 			}
+
+			if (sm_assetTypeValidatorNames == null || sm_assetTypeValidatorNames.Count == 0)
+			{
+				GUI.enabled = false;
+				EditorGUILayout.Popup("Valid Asset Types", 0, new string[0]);
+				GUI.enabled = true;
+			}
+			else
+			{
+				var property = serializedObject.FindProperty("m_assetTypeValidators");
+				var rect = EditorGUILayout.GetControlRect();
+				property.intValue = EditorGUI.MaskField(rect, "Valid Asset Types", property.intValue, sm_assetTypeValidatorNames.ToArray());
+			}
+			
 
 			serializedObject.ApplyModifiedProperties();
 		}

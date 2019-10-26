@@ -24,7 +24,7 @@ namespace Alf.UnityLocker.Editor
 		[MenuItem(LockMenuName, true)]
 		public static bool ValidateLock()
 		{
-			return (Selection.activeObject is SceneAsset || PrefabUtility.GetPrefabType(Selection.activeObject) != PrefabType.None) && !Locker.IsAssetLocked(Selection.activeObject);
+			return !Locker.IsAssetLocked(Selection.activeObject) && Container.GetAssetTypeValidators().IsAssetValid(Selection.activeObject);
 		}
 
 		[MenuItem(UnlockMenuName)]
@@ -42,7 +42,7 @@ namespace Alf.UnityLocker.Editor
 		[MenuItem(UnlockMenuName, true)]
 		public static bool ValidateUnlock()
 		{
-			return (Selection.activeObject is SceneAsset || PrefabUtility.GetPrefabType(Selection.activeObject) != PrefabType.None) && Locker.IsAssetLockedByMe(Selection.activeObject);
+			return Locker.IsAssetLockedByMe(Selection.activeObject);
 		}
 
 		[MenuItem(UnlockFromCurrentCommitMenuName)]
@@ -60,7 +60,7 @@ namespace Alf.UnityLocker.Editor
 		[MenuItem(UnlockFromCurrentCommitMenuName, true)]
 		public static bool ValidateUnlockFromCurrentCommit()
 		{
-			return Container.GetLockSettings().VersionControlName != "None" && (Selection.activeObject is SceneAsset || PrefabUtility.GetPrefabType(Selection.activeObject) != PrefabType.None) && Locker.IsAssetLockedByMe(Selection.activeObject);
+			return Container.GetLockSettings().VersionControlName != "None" && Locker.IsAssetLockedByMe(Selection.activeObject);
 		}
 
 		[MenuItem(OpenSettingsFileMenuName, priority = 10000)]

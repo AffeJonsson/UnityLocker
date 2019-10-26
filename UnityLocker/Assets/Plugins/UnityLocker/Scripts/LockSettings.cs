@@ -18,6 +18,8 @@ namespace Alf.UnityLocker
 		private string m_baseFolderAdditionalPath;
 		[SerializeField]
 		private int m_parentFolderCount;
+		[SerializeField]
+		private int m_assetTypeValidators;
 
 		public string GetLockedAssetsUrl
 		{
@@ -75,6 +77,11 @@ namespace Alf.UnityLocker
 			{
 				return VersionControlName != null && m_baseUrl != null;
 			}
+		}
+
+		public int AssetTypeValidators
+		{
+			get { return m_assetTypeValidators; }
 		}
 	}
 }

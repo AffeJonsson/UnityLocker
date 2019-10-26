@@ -1,4 +1,5 @@
-﻿using Alf.UnityLocker.Editor.VersionControlHandlers;
+﻿using Alf.UnityLocker.Editor.AssetTypeValidators;
+using Alf.UnityLocker.Editor.VersionControlHandlers;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
@@ -10,12 +11,13 @@ namespace Alf.UnityLocker.Editor
 	public static class Container
 	{
 		private static readonly Dictionary<string, IVersionControlHandler> sm_versionControlHandlers;
+		private static readonly AssetTypeValidatorCollection sm_assetTypeValidators;
 		private static readonly LockSettings sm_lockSettings;
 		private static readonly WWWManager sm_wWWManager;
 
 		static Container()
 		{
-			var assetGuids = AssetDatabase.FindAssets("t:" + nameof(UnityLocker.LockSettings));
+			var assetGuids = AssetDatabase.FindAssets("t:" + nameof(LockSettings));
 			for (var i = 0; i < assetGuids.Length; i++)
 			{
 				var asset = AssetDatabase.LoadAssetAtPath<LockSettings>(AssetDatabase.GUIDToAssetPath(assetGuids[i]));
@@ -40,10 +42,10 @@ namespace Alf.UnityLocker.Editor
 				AssetDatabase.CreateAsset(sm_lockSettings, "Assets/UnityLocker/Assets/LockSettings.asset");
 			}
 
+			var assemblies = AppDomain.CurrentDomain.GetAssemblies();
 			if (sm_lockSettings.IsSetUp)
 			{
 				sm_versionControlHandlers = new Dictionary<string, IVersionControlHandler>(4);
-				var assemblies = AppDomain.CurrentDomain.GetAssemblies();
 				for (var i = 0; i < assemblies.Length; i++)
 				{
 					var types = assemblies[i].GetTypes();
@@ -60,6 +62,20 @@ namespace Alf.UnityLocker.Editor
 			else
 			{
 				Debug.LogError("Lock Settings has not been correctly configured");
+			}
+
+			sm_assetTypeValidators = new AssetTypeValidatorCollection();
+			for (var i = 0; i < assemblies.Length; i++)
+			{
+				var types = assemblies[i].GetTypes();
+				for (var j = 0; j < types.Length; j++)
+				{
+					var atvAttribute = types[j].GetCustomAttribute<AssetTypeValidatorAttribute>();
+					if (atvAttribute != null)
+					{
+						sm_assetTypeValidators.Add((IAssetTypeValidator)Activator.CreateInstance(types[j]), atvAttribute.Flag);
+					}
+				}
 			}
 
 			sm_wWWManager = new WWWManager();
@@ -83,6 +99,11 @@ namespace Alf.UnityLocker.Editor
 		public static WWWManager GetWWWManager()
 		{
 			return sm_wWWManager;
+		}
+
+		public static AssetTypeValidatorCollection GetAssetTypeValidators()
+		{
+			return sm_assetTypeValidators;
 		}
 	}
 }
