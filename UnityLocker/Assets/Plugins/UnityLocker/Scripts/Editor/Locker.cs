@@ -126,6 +126,10 @@ namespace Alf.UnityLocker.Editor
 
 		public static bool IsAssetLocked(UnityEngine.Object asset)
 		{
+			if (!HasFetched)
+			{
+				return true;
+			}
 			LockedAssetsData.AssetLockData lockData;
 			if (sm_lockedAssets.TryGetValue(asset, out lockData))
 			{
@@ -136,6 +140,10 @@ namespace Alf.UnityLocker.Editor
 
 		public static bool IsAssetLockedByMe(UnityEngine.Object asset)
 		{
+			if (!HasFetched)
+			{
+				return false;
+			}
 			LockedAssetsData.AssetLockData lockData;
 			if (sm_lockedAssets.TryGetValue(asset, out lockData))
 			{
@@ -146,6 +154,10 @@ namespace Alf.UnityLocker.Editor
 
 		public static bool IsAssetLockedBySomeoneElse(UnityEngine.Object asset)
 		{
+			if (!HasFetched)
+			{
+				return true;
+			}
 			LockedAssetsData.AssetLockData lockData;
 			if (sm_lockedAssets.TryGetValue(asset, out lockData))
 			{
@@ -163,7 +175,7 @@ namespace Alf.UnityLocker.Editor
 			}
 			return null;
 		}
-		
+
 		public static string GetAssetUnlockCommitSha(UnityEngine.Object asset)
 		{
 			LockedAssetsData.AssetLockData lockData;

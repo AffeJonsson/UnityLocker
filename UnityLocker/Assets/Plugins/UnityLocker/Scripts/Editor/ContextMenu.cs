@@ -4,12 +4,13 @@ namespace Alf.UnityLocker.Editor
 {
 	public static class ContextMenu
 	{
-		private const string LockMenuName = "Assets/UnityLocker/Lock";
-		private const string UnlockMenuName = "Assets/UnityLocker/Unlock (Globally)";
-		private const string UnlockFromCurrentCommitMenuName = "Assets/UnityLocker/Unlock (From current commit)";
-		private const string OpenSettingsFileMenuName = "Assets/UnityLocker/Open Settings File";
+		private const string LockMenuName = "Assets/Lock";
+		private const string UnlockMenuName = "Assets/Unlock (Globally)";
+		private const string UnlockFromCurrentCommitMenuName = "Assets/Unlock (From current commit)";
+		private const string OpenSettingsFileMenuName = "Tools/Open Locker Settings File";
+		private const int Priority = 600;
 
-		[MenuItem(LockMenuName)]
+		[MenuItem(LockMenuName, priority = Priority)]
 		public static void Lock()
 		{
 			Locker.TryLockAsset(Selection.activeObject, (success, errorMessage) =>
@@ -27,7 +28,7 @@ namespace Alf.UnityLocker.Editor
 			return !Locker.IsAssetLocked(Selection.activeObject) && Container.GetAssetTypeValidators().IsAssetValid(Selection.activeObject);
 		}
 
-		[MenuItem(UnlockMenuName)]
+		[MenuItem(UnlockMenuName, priority = Priority + 1)]
 		public static void Unlock()
 		{
 			Locker.TryUnlockAsset(Selection.activeObject, (success, errorMessage) =>
@@ -45,7 +46,7 @@ namespace Alf.UnityLocker.Editor
 			return Locker.IsAssetLockedByMe(Selection.activeObject);
 		}
 
-		[MenuItem(UnlockFromCurrentCommitMenuName)]
+		[MenuItem(UnlockFromCurrentCommitMenuName, priority = Priority + 2)]
 		public static void UnlockFromCurrentCommit()
 		{
 			Locker.TryUnlockAssetAtCurrentCommit(Selection.activeObject, (success, errorMessage) =>
