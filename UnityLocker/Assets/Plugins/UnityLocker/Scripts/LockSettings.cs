@@ -31,12 +31,12 @@ namespace Alf.UnityLocker
 			get { return m_baseUrl + "/lock-asset"; }
 		}
 
-		public string UnlockAssetUrl
+		public string RevertAssetLockUrl
 		{
 			get { return m_baseUrl + "/unlock-asset"; }
 		}
 
-		public string UnlockAssetAtCommitUrl
+		public string UnlockAssetUrl
 		{
 			get { return m_baseUrl + "/unlock-asset-at-commit"; }
 		}

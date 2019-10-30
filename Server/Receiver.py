@@ -45,9 +45,9 @@ def actual_lock_asset(asset, locker):
     file.close()
     lock_datas = [x for x in js["RawLockData"] if x["Guid"] == asset]
     if len(lock_datas) > 0:
-        lock_datas[0]["UnlockSha"] = ""
+        lock_datas[0]["Locked"] = True
     else:
-        js["RawLockData"].append({"Guid": asset, "LockerName": locker, "UnlockSha": ""})
+        js["RawLockData"].append({"Guid": asset, "LockerName": locker, "Locked": True, "UnlockSha": ""})
     file = open("locked-assets.json", "w")
     file.writelines(json.dumps(js))
     file.close()
@@ -62,7 +62,7 @@ def actual_unlock_asset(asset):
     file.close()
     lock_datas = [x for x in js["RawLockData"] if x["Guid"] == asset]
     if len(lock_datas) > 0:
-        js["RawLockData"].remove(lock_datas[0])
+        lock_datas[0]["Locked"] = False
         file = open("locked-assets.json", "w")
         file.writelines(json.dumps(js))
         file.close()
@@ -77,6 +77,7 @@ def actual_unlock_asset_at_commit(asset, sha):
     file.close()
     lock_datas = [x for x in js["RawLockData"] if x["Guid"] == asset]
     if len(lock_datas) > 0:
+        lock_datas[0]["Locked"] = False
         lock_datas[0]["UnlockSha"] = sha
         file = open("locked-assets.json", "w")
         file.writelines(json.dumps(js))

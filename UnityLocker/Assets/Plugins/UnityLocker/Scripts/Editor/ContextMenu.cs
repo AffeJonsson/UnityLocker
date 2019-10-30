@@ -5,8 +5,8 @@ namespace Alf.UnityLocker.Editor
 	public static class ContextMenu
 	{
 		private const string LockMenuName = "Assets/Lock";
-		private const string UnlockMenuName = "Assets/Unlock (Globally)";
-		private const string UnlockFromCurrentCommitMenuName = "Assets/Unlock (From current commit)";
+		private const string RevertMenuName = "Assets/Revert Lock";
+		private const string UnlockMenuName = "Assets/Unlock";
 		private const string OpenSettingsFileMenuName = "Tools/Open Locker Settings File";
 		private const int Priority = 600;
 
@@ -28,7 +28,25 @@ namespace Alf.UnityLocker.Editor
 			return !Locker.IsAssetLocked(Selection.activeObject) && Container.GetAssetTypeValidators().IsAssetValid(Selection.activeObject);
 		}
 
-		[MenuItem(UnlockMenuName, priority = Priority + 1)]
+		[MenuItem(RevertMenuName, priority = Priority + 1)]
+		public static void RevertLock()
+		{
+			Locker.TryRevertAssetLock(Selection.activeObject, (success, errorMessage) =>
+			{
+				if (!success)
+				{
+					EditorUtility.DisplayDialog("Asset reverting failed", "Asset reverting failed\n" + errorMessage, "OK");
+				}
+			});
+		}
+
+		[MenuItem(RevertMenuName, true)]
+		public static bool ValidateRevertLock()
+		{
+			return Locker.IsAssetLockedByMe(Selection.activeObject);
+		}
+
+		[MenuItem(UnlockMenuName, priority = Priority + 2)]
 		public static void Unlock()
 		{
 			Locker.TryUnlockAsset(Selection.activeObject, (success, errorMessage) =>
@@ -44,24 +62,6 @@ namespace Alf.UnityLocker.Editor
 		public static bool ValidateUnlock()
 		{
 			return Locker.IsAssetLockedByMe(Selection.activeObject);
-		}
-
-		[MenuItem(UnlockFromCurrentCommitMenuName, priority = Priority + 2)]
-		public static void UnlockFromCurrentCommit()
-		{
-			Locker.TryUnlockAssetAtCurrentCommit(Selection.activeObject, (success, errorMessage) =>
-			{
-				if (!success)
-				{
-					EditorUtility.DisplayDialog("Asset unlocking failed", "Asset unlocking failed\n" + errorMessage, "OK");
-				}
-			});
-		}
-
-		[MenuItem(UnlockFromCurrentCommitMenuName, true)]
-		public static bool ValidateUnlockFromCurrentCommit()
-		{
-			return Container.GetLockSettings().VersionControlName != "None" && Locker.IsAssetLockedByMe(Selection.activeObject);
 		}
 
 		[MenuItem(OpenSettingsFileMenuName, priority = 10000)]

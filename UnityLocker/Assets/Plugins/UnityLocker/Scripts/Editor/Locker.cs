@@ -52,7 +52,7 @@ namespace Alf.UnityLocker.Editor
 			});
 		}
 
-		public static void TryUnlockAsset(UnityEngine.Object asset, Action<bool, string> onUnlockComplete)
+		public static void TryRevertAssetLock(UnityEngine.Object asset, Action<bool, string> onUnlockComplete)
 		{
 			FetchLockedAssets(() =>
 			{
@@ -62,16 +62,16 @@ namespace Alf.UnityLocker.Editor
 					onUnlockComplete(false, "Asset is not locked by you, it's locked by " + sm_lockedAssets[asset].LockerName);
 					return;
 				}
-				Debug.Log("Unlocked asset " + asset);
+				Debug.Log("Reverted lock asset " + asset);
 				sm_lockedAssets.Remove(asset);
-				UnlockAssetAsync(Container.GetLockSettings().UnlockAssetUrl, asset, () =>
+				RevertAssetLockAsync(Container.GetLockSettings().RevertAssetLockUrl, asset, () =>
 				{
 					onUnlockComplete(true, null);
 				});
 			});
 		}
 
-		public static void TryUnlockAssetAtCurrentCommit(UnityEngine.Object asset, Action<bool, string> onUnlockComplete)
+		public static void TryUnlockAsset(UnityEngine.Object asset, Action<bool, string> onUnlockComplete)
 		{
 			FetchLockedAssets(() =>
 			{
@@ -84,7 +84,7 @@ namespace Alf.UnityLocker.Editor
 				}
 				Debug.Log("Unlocked asset " + asset + " at current commit");
 				sm_lockedAssets.Remove(asset);
-				UnlockAssetAtCurrentCommitAsync(Container.GetLockSettings().UnlockAssetAtCommitUrl, asset, () =>
+				UnlockAssetAsync(Container.GetLockSettings().UnlockAssetUrl, asset, () =>
 				{
 					onUnlockComplete(true, null);
 				});
@@ -97,33 +97,21 @@ namespace Alf.UnityLocker.Editor
 			var url = Container.GetLockSettings().GetLockedAssetsUrl;
 			FecthLockedAssetsAsync(url, (data) =>
 			{
+				HasFetched = true;
 				if (string.IsNullOrEmpty(data))
 				{
+					sm_lockedAssets = new Dictionary<UnityEngine.Object, LockedAssetsData.AssetLockData>();
 					onAssetsFetched?.Invoke();
 					return;
 				}
 				var lockData = JsonConvert.DeserializeObject<LockedAssetsData>(data);
 				sm_lockedAssets = lockData.LockData;
-				HasFetched = true;
 				onAssetsFetched?.Invoke();
 				EditorApplication.RepaintHierarchyWindow();
 				EditorApplication.RepaintProjectWindow();
 			});
 		}
-
-		public static void IsAssetLocked(UnityEngine.Object asset, Action<bool> onLockedChecked)
-		{
-			if (sm_lockedAssets == null)
-			{
-				FetchLockedAssets(() =>
-				{
-					onLockedChecked?.Invoke(IsAssetLocked(asset));
-				});
-				return;
-			}
-			onLockedChecked?.Invoke(IsAssetLocked(asset));
-		}
-
+		
 		public static bool IsAssetLocked(UnityEngine.Object asset)
 		{
 			if (!HasFetched)
@@ -133,7 +121,7 @@ namespace Alf.UnityLocker.Editor
 			LockedAssetsData.AssetLockData lockData;
 			if (sm_lockedAssets.TryGetValue(asset, out lockData))
 			{
-				return string.IsNullOrEmpty(lockData.UnlockSha) || !Container.GetVersionControlHandler().IsCommitChildOfHead(lockData.UnlockSha);
+				return lockData.Locked || (!string.IsNullOrEmpty(lockData.UnlockSha) && !Container.GetVersionControlHandler().IsCommitChildOfHead(lockData.UnlockSha));
 			}
 			return false;
 		}
@@ -147,7 +135,7 @@ namespace Alf.UnityLocker.Editor
 			LockedAssetsData.AssetLockData lockData;
 			if (sm_lockedAssets.TryGetValue(asset, out lockData))
 			{
-				return (string.IsNullOrEmpty(lockData.UnlockSha) || !Container.GetVersionControlHandler().IsCommitChildOfHead(lockData.UnlockSha)) && lockData.LockerName == Container.GetLockSettings().Username;
+				return (lockData.Locked || (!string.IsNullOrEmpty(lockData.UnlockSha) && !Container.GetVersionControlHandler().IsCommitChildOfHead(lockData.UnlockSha))) && lockData.LockerName == Container.GetLockSettings().Username;
 			}
 			return false;
 		}
@@ -161,7 +149,7 @@ namespace Alf.UnityLocker.Editor
 			LockedAssetsData.AssetLockData lockData;
 			if (sm_lockedAssets.TryGetValue(asset, out lockData))
 			{
-				return (string.IsNullOrEmpty(lockData.UnlockSha) || !Container.GetVersionControlHandler().IsCommitChildOfHead(lockData.UnlockSha)) && lockData.LockerName != Container.GetLockSettings().Username;
+				return (lockData.Locked || (!string.IsNullOrEmpty(lockData.UnlockSha) && !Container.GetVersionControlHandler().IsCommitChildOfHead(lockData.UnlockSha))) && lockData.LockerName != Container.GetLockSettings().Username;
 			}
 			return false;
 		}
@@ -174,6 +162,16 @@ namespace Alf.UnityLocker.Editor
 				return lockData.LockerName;
 			}
 			return null;
+		}
+
+		public static bool GetAssetUnlockedAtLaterCommit(UnityEngine.Object asset)
+		{
+			LockedAssetsData.AssetLockData lockData;
+			if (sm_lockedAssets.TryGetValue(asset, out lockData))
+			{
+				return !lockData.Locked;
+			}
+			return false;
 		}
 
 		public static string GetAssetUnlockCommitSha(UnityEngine.Object asset)
@@ -204,7 +202,7 @@ namespace Alf.UnityLocker.Editor
 			Container.GetWWWManager().WaitForWWW(www, onComplete);
 		}
 
-		private static void UnlockAssetAsync(string url, UnityEngine.Object asset, Action onComplete)
+		private static void RevertAssetLockAsync(string url, UnityEngine.Object asset, Action onComplete)
 		{
 			var form = new WWWForm();
 			form.AddField("Guid", AssetDatabase.AssetPathToGUID(AssetDatabase.GetAssetPath(asset)));
@@ -212,7 +210,7 @@ namespace Alf.UnityLocker.Editor
 			Container.GetWWWManager().WaitForWWW(www, onComplete);
 		}
 
-		private static void UnlockAssetAtCurrentCommitAsync(string url, UnityEngine.Object asset, Action onComplete)
+		private static void UnlockAssetAsync(string url, UnityEngine.Object asset, Action onComplete)
 		{
 			var form = new WWWForm();
 			form.AddField("Guid", AssetDatabase.AssetPathToGUID(AssetDatabase.GetAssetPath(asset)));
