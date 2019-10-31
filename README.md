@@ -34,4 +34,5 @@ Unlocking a file marks the asset as unlocked for users above your current commit
 ## Required Files
 `lockermain.unitypackage` This is the main package and is required to be able to use this tool.
 `lockerjsondotnet.unitypackage` This is the only package that UnityLocker is dependent on. If your project already has JSON.NET package, this is not needed.
-`lockerlibgit2sharp` This is needed for the Git repository option to work.
+`lockerversioncontrolgit` This adds the ability to use Git as your version control handler.
+`lockerlibgit2sharp` This is needed for the Git version control handler to work.
