@@ -4,7 +4,7 @@ UnityLocker is a tool that allows teams to lock files inside unity, which makes 
 
 ## How it works
 UnityLocker needs a connection to some kind of server instance, where lock data is stored. As an example, a Flask app has been provided which listenes to requests about locking, unlocking and getting the status of locked assets. 
-Inside Unity, right clicking an asset presents a context menu which contains the buttons "Lock", "Unlock (Globally)" and "Unlock (From current commit)".
+Inside Unity, right clicking an asset presents a context menu which contains the buttons "Lock", "Revert" and "Unlock".
 
 ### Lock
 Locking an assets marks the assets, and other users cannot save that particular asset. To lock a file, either right click an asset and select "Lock", or select an asset and via the Asset menu, select "Lock".
@@ -17,7 +17,7 @@ Unlocking a file marks the asset as unlocked for users above your current commit
 
 ## Installation
 1. Download the sample server and run Starter.bat. This will start a flask app on your device that listenes to port 5000.
-2. Add the needed files to your Unity project, then open the settings file (Tools/Open Locker Settings File).
+2. Add the needed files to your Unity project (More info below!), then open the settings file (Tools/Open Locker Settings File).
 3. Fill in the missing information:
 
 `Base URL`: The url to where your server is running. Port must be included. E.g. `localhost:5000`
@@ -30,3 +30,8 @@ Unlocking a file marks the asset as unlocked for users above your current commit
 
 4. Push all assets and make sure your team gets them as well.
 5. Start locking files!
+
+## Required Files
+`lockermain.unitypackage` This is the main package and is required to be able to use this tool.
+`lockerjsondotnet.unitypackage` This is the only package that UnityLocker is dependent on. If your project already has JSON.NET package, this is not needed.
+`lockerlibgit2sharp` This is needed for the Git repository option to work.
