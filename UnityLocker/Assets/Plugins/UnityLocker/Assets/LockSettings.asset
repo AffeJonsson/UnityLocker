@@ -15,8 +15,8 @@ MonoBehaviour:
   m_lockedByMeIcon: {fileID: 2800000, guid: 70f4b5f785f5ddf488cf2213788d3497, type: 3}
   m_lockedNowButUnlockedLaterIcon: {fileID: 2800000, guid: c04bf6af44421534ebf51e91e54fab30,
     type: 3}
-  m_baseUrl: localhost:5000
-  m_versionControlName: Git
-  m_baseFolderAdditionalPath: ..\..\
-  m_parentFolderCount: 2
-  m_assetTypeValidators: -1
+  m_baseUrl: 
+  m_versionControlName: 
+  m_baseFolderAdditionalPath: 
+  m_parentFolderCount: 0
+  m_assetTypeValidators: 0
