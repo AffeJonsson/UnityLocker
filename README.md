@@ -20,13 +20,13 @@ Unlocking a file marks the asset as unlocked for users above your current commit
 2. Add the needed files to your Unity project, then open the settings file (Tools/Open Locker Settings File).
 3. Fill in the missing information:
 
-  3.1 _Base URL:_ The url to where your server is running. Port must be included. E.g. `localhost:5000`
+3.1 _Base URL:_ The url to where your server is running. Port must be included. E.g. `localhost:5000`
 
-  3.2 _Parent Folder Count:_ How deep down inside the git folder your Unity project is. Below this field, you can see the current path. Change the number until this is correct.
+3.2 _Parent Folder Count:_ How deep down inside the git folder your Unity project is. Below this field, you can see the current path. Change the number until this is correct.
 
-  3.3 _Version Control:_ Change this to the version control software you're using.
+3.3 _Version Control:_ Change this to the version control software you're using.
 
-  3.4 _Valid Asset Types:_ Change this to determine what types of assets are valid.
+3.4 _Valid Asset Types:_ Change this to determine what types of assets are valid.
 
 4. Push all assets and make sure your team gets them as well.
 5. Start locking files!
