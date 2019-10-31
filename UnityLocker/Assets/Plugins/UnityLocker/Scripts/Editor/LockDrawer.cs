@@ -1,7 +1,5 @@
 ﻿using UnityEditor;
 using UnityEngine;
-using System.Collections.Generic;
-using UnityEditor.SceneManagement;
 
 namespace Alf.UnityLocker.Editor
 {
@@ -28,24 +26,20 @@ namespace Alf.UnityLocker.Editor
 			{
 				return;
 			}
-
-			if (editor.serializedObject.targetObject is SceneAsset || PrefabUtility.GetPrefabType(editor.serializedObject.targetObject) != PrefabType.None)
+			if (Locker.IsAssetLocked(Selection.activeObject))
 			{
-				if (Locker.IsAssetLocked(editor.serializedObject.targetObject))
+				var locker = Locker.GetAssetLocker(Selection.activeObject);
+				if (locker != null)
 				{
-					var locker = Locker.GetAssetLocker(editor.serializedObject.targetObject);
-					if (locker != null)
+					TryDrawLock(new Rect(7, 7, 14, 14), Selection.activeObject);
+					EditorGUILayout.LabelField("Asset locked by " + locker, EditorStyles.boldLabel);
+					var isUnlockedAtLaterCommit = Locker.GetAssetUnlockedAtLaterCommit(Selection.activeObject);
+					if (isUnlockedAtLaterCommit)
 					{
-						TryDrawLock(new Rect(9, 9, 14, 14), editor.serializedObject.targetObject);
-						EditorGUILayout.LabelField("Asset locked by " + locker, EditorStyles.boldLabel);
-						var isUnlockedAtLaterCommit = Locker.GetAssetUnlockedAtLaterCommit(editor.serializedObject.targetObject);
-						if (isUnlockedAtLaterCommit)
+						var sha = Locker.GetAssetUnlockCommitSha(Selection.activeObject);
+						if (!string.IsNullOrEmpty(sha))
 						{
-							var sha = Locker.GetAssetUnlockCommitSha(editor.serializedObject.targetObject);
-							if (!string.IsNullOrEmpty(sha))
-							{
-								EditorGUILayout.LabelField("(Unlocked at commit " + sha.Substring(0, 8) + ")");
-							}
+							EditorGUILayout.LabelField("(Unlocked at commit " + sha.Substring(0, 8) + ")");
 						}
 					}
 				}

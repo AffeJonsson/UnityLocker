@@ -25,7 +25,7 @@ namespace Alf.UnityLocker.Editor
 		[MenuItem(LockMenuName, true)]
 		public static bool ValidateLock()
 		{
-			return !Locker.IsAssetLocked(Selection.activeObject) && Container.GetAssetTypeValidators().IsAssetValid(Selection.activeObject);
+			return Selection.activeObject != null && !Locker.IsAssetLocked(Selection.activeObject) && Container.GetAssetTypeValidators().IsAssetValid(Selection.activeObject);
 		}
 
 		[MenuItem(RevertMenuName, priority = Priority + 1)]
@@ -43,7 +43,7 @@ namespace Alf.UnityLocker.Editor
 		[MenuItem(RevertMenuName, true)]
 		public static bool ValidateRevertLock()
 		{
-			return Locker.IsAssetLockedByMe(Selection.activeObject);
+			return Selection.activeObject != null && Locker.IsAssetLockedByMe(Selection.activeObject);
 		}
 
 		[MenuItem(UnlockMenuName, priority = Priority + 2)]
@@ -61,7 +61,7 @@ namespace Alf.UnityLocker.Editor
 		[MenuItem(UnlockMenuName, true)]
 		public static bool ValidateUnlock()
 		{
-			return Locker.IsAssetLockedByMe(Selection.activeObject);
+			return Selection.activeObject != null && Locker.IsAssetLockedByMe(Selection.activeObject);
 		}
 
 		[MenuItem(OpenSettingsFileMenuName, priority = 10000)]
