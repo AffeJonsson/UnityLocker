@@ -31,15 +31,19 @@ namespace Alf.UnityLocker.Editor
 			if (sm_lockSettings == null)
 			{
 				sm_lockSettings = ScriptableObject.CreateInstance<LockSettings>();
-				if (!AssetDatabase.IsValidFolder("Assets/UnityLocker"))
+				if (!AssetDatabase.IsValidFolder("Assets/Plugins"))
 				{
-					AssetDatabase.CreateFolder("Assets", "UnityLocker");
+					AssetDatabase.CreateFolder("Assets", "Plugins");
 				}
-				if (!AssetDatabase.IsValidFolder("Assets/UnityLocker/Assets"))
+				if (!AssetDatabase.IsValidFolder("Assets/Plugins/UnityLocker"))
 				{
-					AssetDatabase.CreateFolder("Assets/UnityLocker", "Assets");
+					AssetDatabase.CreateFolder("Assets/Plugins", "UnityLocker");
 				}
-				AssetDatabase.CreateAsset(sm_lockSettings, "Assets/UnityLocker/Assets/LockSettings.asset");
+				if (!AssetDatabase.IsValidFolder("Assets/Plugins/UnityLocker/Assets"))
+				{
+					AssetDatabase.CreateFolder("Assets/Plugins/UnityLocker", "Assets");
+				}
+				AssetDatabase.CreateAsset(sm_lockSettings, "Assets/Plugins/UnityLocker/Assets/LockSettings.asset");
 			}
 
 			var assemblies = AppDomain.CurrentDomain.GetAssemblies();
