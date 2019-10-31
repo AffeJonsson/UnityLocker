@@ -19,9 +19,14 @@ Unlocking a file marks the asset as unlocked for users above your current commit
 1. Download the sample server and run Starter.bat. This will start a flask app on your device that listenes to port 5000.
 2. Add the needed files to your Unity project, then open the settings file (Tools/Open Locker Settings File).
 3. Fill in the missing information:
+
 `Base URL`: The url to where your server is running. Port must be included. E.g. `localhost:5000`
+
 `Parent Folder Count`: How deep down inside the git folder your Unity project is. Below this field, you can see the current path. Change the number until this is correct.
+
 `Version Control`: Change this to the version control software you're using.
+
 `Valid Asset Types`: Change this to determine what types of assets are valid.
+
 4. Push all assets and make sure your team gets them as well.
 5. Start locking files!
