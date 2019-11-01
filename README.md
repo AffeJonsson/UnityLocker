@@ -36,6 +36,6 @@ Unlocking a file marks the asset as unlocked for users above your current commit
 
 `lockerjsondotnet.unitypackage` This is the only package that UnityLocker is dependent on. If your project already has a JSON.NET plugin, this is not needed. (https://github.com/JamesNK/Newtonsoft.Json, MIT licence)
 
-`lockerversioncontrolgit` This adds the ability to use Git as your version control handler.
+`lockerversioncontrolgit.unitypackage` This adds the ability to use Git as your version control handler.
 
-`lockerlibgit2sharp` This is needed for the Git version control handler to work. If your project already has a LibGit2Sharp plugin, this is not needed. (https://github.com/libgit2/libgit2sharp, MIT Licence)
+`lockerlibgit2sharp.unitypackage` This is needed for the Git version control handler to work. If your project already has a LibGit2Sharp plugin, this is not needed. (https://github.com/libgit2/libgit2sharp, MIT Licence)
