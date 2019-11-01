@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
@@ -31,6 +32,62 @@ namespace Alf.UnityLocker.Editor
 			{
 				FetchLockedAssets(null);
 			}
+		}
+
+		public static IEnumerable<LockedAssetsData.AssetLockData> GetAssetsLockedByMe()
+		{
+			if (sm_lockedAssets == null || sm_lockedAssets.Count == 0)
+			{
+				yield break;
+			}
+			foreach (var kvp in sm_lockedAssets)
+			{
+				Debug.Log(kvp);
+			}
+			var enumerator = sm_lockedAssets.GetEnumerator();
+			while(enumerator.MoveNext())
+			{
+				if (enumerator.Current.Key == null)
+				{
+					Debug.LogWarning(enumerator.Current + " is null");
+				}
+				else if (IsAssetLockedByMe(enumerator.Current.Key))
+				{
+					yield return enumerator.Current.Value;
+				}
+			}
+		}
+
+		public static IEnumerable<LockedAssetsData.AssetLockData> GetAssetsLockedBySomeoneElse()
+		{
+			if (sm_lockedAssets == null || sm_lockedAssets.Count == 0)
+			{
+				yield break;
+			}
+			var enumerator = sm_lockedAssets.GetEnumerator();
+			do
+			{
+				if (IsAssetLockedBySomeoneElse(enumerator.Current.Key))
+				{
+					yield return enumerator.Current.Value;
+				}
+			} while (enumerator.MoveNext());
+		}
+
+		public static IEnumerable<LockedAssetsData.AssetLockData> GetAssetsUnlockedLater()
+		{
+			if (sm_lockedAssets == null || sm_lockedAssets.Count == 0)
+			{
+				yield break;
+			}
+			var enumerator = sm_lockedAssets.GetEnumerator();
+			do
+			{
+				if (IsAssetUnlockedAtLaterCommit(enumerator.Current.Key))
+				{
+					yield return enumerator.Current.Value;
+				}
+			} while (enumerator.MoveNext());
 		}
 
 		public static void TryLockAsset(UnityEngine.Object asset, Action<bool, string> onLockComplete)
@@ -111,7 +168,7 @@ namespace Alf.UnityLocker.Editor
 				EditorApplication.RepaintProjectWindow();
 			});
 		}
-		
+
 		public static bool IsAssetLocked(UnityEngine.Object asset)
 		{
 			if (!HasFetched)
@@ -164,7 +221,7 @@ namespace Alf.UnityLocker.Editor
 			return null;
 		}
 
-		public static bool GetAssetUnlockedAtLaterCommit(UnityEngine.Object asset)
+		public static bool IsAssetUnlockedAtLaterCommit(UnityEngine.Object asset)
 		{
 			LockedAssetsData.AssetLockData lockData;
 			if (sm_lockedAssets.TryGetValue(asset, out lockData))

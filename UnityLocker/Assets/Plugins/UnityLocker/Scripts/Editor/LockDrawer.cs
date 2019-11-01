@@ -33,7 +33,7 @@ namespace Alf.UnityLocker.Editor
 				{
 					TryDrawLock(new Rect(7, 7, 14, 14), Selection.activeObject);
 					EditorGUILayout.LabelField("Asset locked by " + locker, EditorStyles.boldLabel);
-					var isUnlockedAtLaterCommit = Locker.GetAssetUnlockedAtLaterCommit(Selection.activeObject);
+					var isUnlockedAtLaterCommit = Locker.IsAssetUnlockedAtLaterCommit(Selection.activeObject);
 					if (isUnlockedAtLaterCommit)
 					{
 						var sha = Locker.GetAssetUnlockCommitSha(Selection.activeObject);
