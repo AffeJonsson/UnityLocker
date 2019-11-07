@@ -1,5 +1,7 @@
-﻿using UnityEditor;
+﻿using System.Collections.Generic;
+using UnityEditor;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace Alf.UnityLocker.Editor
 {
@@ -7,16 +9,31 @@ namespace Alf.UnityLocker.Editor
 	public static class LockDrawer
 	{
 		private static int sm_currentSceneIndex;
+		private static Dictionary<int, SceneAsset> sm_scenes;
 
 		static LockDrawer()
 		{
+			sm_scenes = new Dictionary<int, SceneAsset>();
+			BuildSceneMap();
+
 			EditorApplication.projectWindowItemOnGUI += OnProjectWindowItemGUI;
 			EditorApplication.hierarchyWindowItemOnGUI += OnHierarchyWindowItemOnGUI;
-
+			
 			// finishedDefaultHeaderGUI was added in 2018.2
 #if UNITY_2018_2_OR_NEWER
 			UnityEditor.Editor.finishedDefaultHeaderGUI += OnFinishedHeaderGUI;
 #endif
+		}
+
+		private static void BuildSceneMap()
+		{
+			sm_scenes.Clear();
+			foreach (var scene in AssetDatabase.FindAssets("t:Scene"))
+			{
+				var scenePath = AssetDatabase.GUIDToAssetPath(scene);
+				var sceneAsset = AssetDatabase.LoadAssetAtPath<SceneAsset>(scenePath);
+				sm_scenes.Add(SceneManager.GetSceneByPath(scenePath).handle, sceneAsset);
+			}
 		}
 
 #if UNITY_2018_2_OR_NEWER
@@ -53,9 +70,19 @@ namespace Alf.UnityLocker.Editor
 			{
 				return;
 			}
+			var asset = EditorUtility.InstanceIDToObject(instanceId) as GameObject;
 
-			var asset = EditorUtility.InstanceIDToObject(instanceId);
-			if (asset != null)
+			if (asset == null)
+			{
+				SceneAsset sceneAsset;
+				if (!sm_scenes.TryGetValue(instanceId, out sceneAsset))
+				{
+					BuildSceneMap();
+					sceneAsset = sm_scenes[instanceId];
+				}
+				TryDrawLock(selectionRect, sceneAsset);
+			}
+			else
 			{
 				TryDrawLock(selectionRect, asset);
 			}
