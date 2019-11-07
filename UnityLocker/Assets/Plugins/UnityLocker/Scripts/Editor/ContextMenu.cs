@@ -1,4 +1,5 @@
-﻿using UnityEditor;
+﻿using System.Linq;
+using UnityEditor;
 
 namespace Alf.UnityLocker.Editor
 {
@@ -9,11 +10,12 @@ namespace Alf.UnityLocker.Editor
 		private const string UnlockMenuName = "Assets/Unlock";
 		private const string OpenSettingsFileMenuName = "Tools/Open Locker Settings File";
 		private const int Priority = 600;
-
+		
 		[MenuItem(LockMenuName, priority = Priority)]
 		public static void Lock()
 		{
-			Locker.TryLockAsset(Selection.activeObject, (success, errorMessage) =>
+			var filtered = Selection.objects.Where(s => AssetDatabase.Contains(s)).ToArray();
+			Locker.TryLockAssets(filtered, (success, errorMessage) =>
 			{
 				if (!success)
 				{
@@ -31,7 +33,8 @@ namespace Alf.UnityLocker.Editor
 		[MenuItem(RevertMenuName, priority = Priority + 1)]
 		public static void RevertLock()
 		{
-			Locker.TryRevertAssetLock(Selection.activeObject, (success, errorMessage) =>
+			var filtered = Selection.objects.Where(s => AssetDatabase.Contains(s)).ToArray();
+			Locker.TryRevertAssetLocks(filtered, (success, errorMessage) =>
 			{
 				if (!success)
 				{
@@ -49,7 +52,8 @@ namespace Alf.UnityLocker.Editor
 		[MenuItem(UnlockMenuName, priority = Priority + 2)]
 		public static void Unlock()
 		{
-			Locker.TryUnlockAsset(Selection.activeObject, (success, errorMessage) =>
+			var filtered = Selection.objects.Where(s => AssetDatabase.Contains(s)).ToArray();
+			Locker.TryUnlockAssets(filtered, (success, errorMessage) =>
 			{
 				if (!success)
 				{
