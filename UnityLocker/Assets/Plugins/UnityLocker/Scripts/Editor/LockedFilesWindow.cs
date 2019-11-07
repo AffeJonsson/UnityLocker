@@ -17,6 +17,7 @@ namespace Alf.UnityLocker.Editor
 		private void OnEnable()
 		{
 			Locker.OnLockedAssetsChanged += OnLockedAssetsChanged;
+			titleContent = new GUIContent("Locked Files");
 		}
 
 		private void OnDisable()
