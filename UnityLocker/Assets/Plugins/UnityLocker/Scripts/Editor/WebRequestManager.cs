@@ -1,4 +1,5 @@
-﻿using System;
+﻿#if UNITY_2018_4_OR_NEWER
+using System;
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
@@ -49,3 +50,4 @@ namespace Alf.UnityLocker.Editor
 		}
 	}
 }
+#endif
