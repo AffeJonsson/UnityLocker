@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using UnityEditor;
+using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -18,21 +19,39 @@ namespace Alf.UnityLocker.Editor
 
 			EditorApplication.projectWindowItemOnGUI += OnProjectWindowItemGUI;
 			EditorApplication.hierarchyWindowItemOnGUI += OnHierarchyWindowItemOnGUI;
-			
+			EditorSceneManager.sceneOpened += OnSceneOpened;
+			EditorSceneManager.sceneClosed += OnSceneClosed;
+			EditorSceneManager.newSceneCreated += OnNewSceneCreated;
+
 			// finishedDefaultHeaderGUI was added in 2018.2
 #if UNITY_2018_2_OR_NEWER
 			UnityEditor.Editor.finishedDefaultHeaderGUI += OnFinishedHeaderGUI;
 #endif
 		}
 
+		private static void OnSceneOpened(Scene scene, OpenSceneMode mode)
+		{
+			BuildSceneMap();
+		}
+
+		private static void OnSceneClosed(Scene scene)
+		{
+			BuildSceneMap();
+		}
+
+		private static void OnNewSceneCreated(Scene scene, NewSceneSetup setup, NewSceneMode mode)
+		{
+			BuildSceneMap();
+		}
+
 		private static void BuildSceneMap()
 		{
 			sm_scenes.Clear();
-			foreach (var scene in AssetDatabase.FindAssets("t:Scene"))
+			for (var i = 0; i < SceneManager.sceneCount; i++)
 			{
-				var scenePath = AssetDatabase.GUIDToAssetPath(scene);
-				var sceneAsset = AssetDatabase.LoadAssetAtPath<SceneAsset>(scenePath);
-				sm_scenes.Add(SceneManager.GetSceneByPath(scenePath).handle, sceneAsset);
+				var scene = SceneManager.GetSceneAt(i);
+				var sceneAsset = AssetDatabase.LoadAssetAtPath<SceneAsset>(scene.path);
+				sm_scenes.Add(scene.handle, sceneAsset);
 			}
 		}
 
@@ -74,12 +93,7 @@ namespace Alf.UnityLocker.Editor
 
 			if (asset == null)
 			{
-				SceneAsset sceneAsset;
-				if (!sm_scenes.TryGetValue(instanceId, out sceneAsset))
-				{
-					BuildSceneMap();
-					sceneAsset = sm_scenes[instanceId];
-				}
+				var sceneAsset = sm_scenes[instanceId];
 				TryDrawLock(selectionRect, sceneAsset);
 			}
 			else
