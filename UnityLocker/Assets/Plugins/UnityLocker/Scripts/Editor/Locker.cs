@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.Networking;
 
 namespace Alf.UnityLocker.Editor
 {
@@ -292,37 +293,69 @@ namespace Alf.UnityLocker.Editor
 
 		private static void FecthLockedAssetsAsync(string url, Action<string> onComplete)
 		{
+#if UNITY_2018_4_OR_NEWER
+
+			var webRequest = UnityWebRequest.Get(url);
+			Container.GetWebRequestManager().WaitForWebRequest(webRequest, () =>
+			{
+				onComplete?.Invoke(webRequest.downloadHandler.text);
+			});
+#else
 			var www = new WWW(url);
 			Container.GetWWWManager().WaitForWWW(www, () =>
 			{
 				onComplete?.Invoke(www.text);
 			});
+#endif
 		}
 
 		private static void LockAssetsAsync(string url, UnityEngine.Object[] assets, Action onComplete)
 		{
+#if UNITY_2018_4_OR_NEWER
+			var form = new WWWForm();
+			form.AddField("Guid", JsonConvert.SerializeObject(assets.Select(a => AssetDatabase.AssetPathToGUID(AssetDatabase.GetAssetPath(a))).ToArray()));
+			form.AddField("LockerName", Container.GetLockSettings().Username);
+			var webRequest = UnityWebRequest.Post(url, form);
+			Container.GetWebRequestManager().WaitForWebRequest(webRequest, onComplete);
+#else
 			var form = new WWWForm();
 			form.AddField("Guid", JsonConvert.SerializeObject(assets.Select(a => AssetDatabase.AssetPathToGUID(AssetDatabase.GetAssetPath(a))).ToArray()));
 			form.AddField("LockerName", Container.GetLockSettings().Username);
 			var www = new WWW(url, form);
 			Container.GetWWWManager().WaitForWWW(www, onComplete);
+#endif
 		}
 
 		private static void RevertAssetLocksAsync(string url, UnityEngine.Object[] assets, Action onComplete)
 		{
+#if UNITY_2018_4_OR_NEWER
+			var form = new WWWForm();
+			form.AddField("Guid", JsonConvert.SerializeObject(assets.Select(a => AssetDatabase.AssetPathToGUID(AssetDatabase.GetAssetPath(a))).ToArray()));
+			var webRequest = UnityWebRequest.Post(url, form);
+			Container.GetWebRequestManager().WaitForWebRequest(webRequest, onComplete);
+#else
 			var form = new WWWForm();
 			form.AddField("Guid", JsonConvert.SerializeObject(assets.Select(a => AssetDatabase.AssetPathToGUID(AssetDatabase.GetAssetPath(a))).ToArray()));
 			var www = new WWW(url, form);
 			Container.GetWWWManager().WaitForWWW(www, onComplete);
+#endif
 		}
 
 		private static void UnlockAssetsAsync(string url, UnityEngine.Object[] assets, Action onComplete)
 		{
+#if UNITY_2018_4_OR_NEWER
+			var form = new WWWForm();
+			form.AddField("Guid", JsonConvert.SerializeObject(assets.Select(a => AssetDatabase.AssetPathToGUID(AssetDatabase.GetAssetPath(a))).ToArray()));
+			form.AddField("Sha", Container.GetVersionControlHandler().GetShaOfHead());
+			var webRequest = UnityWebRequest.Post(url, form);
+			Container.GetWebRequestManager().WaitForWebRequest(webRequest, onComplete);
+#else
 			var form = new WWWForm();
 			form.AddField("Guid", JsonConvert.SerializeObject(assets.Select(a => AssetDatabase.AssetPathToGUID(AssetDatabase.GetAssetPath(a))).ToArray()));
 			form.AddField("Sha", Container.GetVersionControlHandler().GetShaOfHead());
 			var www = new WWW(url, form);
 			Container.GetWWWManager().WaitForWWW(www, onComplete);
+#endif
 		}
 	}
 }

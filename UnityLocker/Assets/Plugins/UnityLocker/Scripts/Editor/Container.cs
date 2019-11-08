@@ -13,7 +13,12 @@ namespace Alf.UnityLocker.Editor
 		private static readonly Dictionary<string, IVersionControlHandler> sm_versionControlHandlers;
 		private static readonly AssetTypeValidatorCollection sm_assetTypeValidators;
 		private static readonly LockSettings sm_lockSettings;
+#if !UNITY_2018_4_OR_NEWER
 		private static readonly WWWManager sm_wWWManager;
+#endif
+#if UNITY_2018_4_OR_NEWER
+		private static readonly WebRequestManager sm_webRequestManager;
+#endif
 
 		static Container()
 		{
@@ -82,7 +87,12 @@ namespace Alf.UnityLocker.Editor
 				}
 			}
 
+#if !UNITY_2018_4_OR_NEWER
 			sm_wWWManager = new WWWManager();
+#endif
+#if UNITY_2018_4_OR_NEWER
+			sm_webRequestManager = new WebRequestManager();
+#endif
 		}
 
 		public static IVersionControlHandler GetVersionControlHandler()
@@ -100,10 +110,19 @@ namespace Alf.UnityLocker.Editor
 			return sm_lockSettings;
 		}
 
+#if !UNITY_2018_4_OR_NEWER
 		public static WWWManager GetWWWManager()
 		{
 			return sm_wWWManager;
 		}
+#endif
+
+#if UNITY_2018_4_OR_NEWER
+		public static WebRequestManager GetWebRequestManager()
+		{
+			return sm_webRequestManager;
+		}
+#endif
 
 		public static AssetTypeValidatorCollection GetAssetTypeValidators()
 		{
