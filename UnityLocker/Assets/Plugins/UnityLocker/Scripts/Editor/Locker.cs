@@ -238,13 +238,13 @@ namespace Alf.UnityLocker.Editor
 			lockedIndex = -1;
 			for (var i = 0; i < assets.Length; i++)
 			{
-				if (!IsAssetLocked(assets[i]))
+				if (IsAssetLocked(assets[i]))
 				{
 					lockedIndex = i;
-					return false;
+					return true;
 				}
 			}
-			return true;
+			return false;
 		}
 
 		public static bool IsAssetLockedBySomeoneElse(UnityEngine.Object asset)
