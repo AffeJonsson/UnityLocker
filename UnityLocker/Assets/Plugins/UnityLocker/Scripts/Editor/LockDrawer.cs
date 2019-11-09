@@ -14,29 +14,15 @@ namespace Alf.UnityLocker.Editor
 
 		static LockDrawer()
 		{
-			sm_scenes = new Dictionary<int, SceneAsset>();
-			BuildSceneMap();
-
+			// Todo: this is slow. Maybe add two more dicts, one for instanceID and one for GUID?
 			EditorApplication.projectWindowItemOnGUI += OnProjectWindowItemGUI;
 			EditorApplication.hierarchyWindowItemOnGUI += OnHierarchyWindowItemOnGUI;
-			EditorSceneManager.sceneOpened += OnSceneOpened;
-			EditorSceneManager.sceneClosed += OnSceneClosed;
 			EditorSceneManager.newSceneCreated += OnNewSceneCreated;
 
 			// finishedDefaultHeaderGUI was added in 2018.2
 #if UNITY_2018_2_OR_NEWER
 			UnityEditor.Editor.finishedDefaultHeaderGUI += OnFinishedHeaderGUI;
 #endif
-		}
-
-		private static void OnSceneOpened(Scene scene, OpenSceneMode mode)
-		{
-			BuildSceneMap();
-		}
-
-		private static void OnSceneClosed(Scene scene)
-		{
-			BuildSceneMap();
 		}
 
 		private static void OnNewSceneCreated(Scene scene, NewSceneSetup setup, NewSceneMode mode)
@@ -46,11 +32,13 @@ namespace Alf.UnityLocker.Editor
 
 		private static void BuildSceneMap()
 		{
-			sm_scenes.Clear();
-			for (var i = 0; i < SceneManager.sceneCount; i++)
+			var guids = AssetDatabase.FindAssets("t:Scene");
+			sm_scenes = new Dictionary<int, SceneAsset>(guids.Length);
+			foreach (var guid in guids)
 			{
-				var scene = SceneManager.GetSceneAt(i);
-				var sceneAsset = AssetDatabase.LoadAssetAtPath<SceneAsset>(scene.path);
+				var path = AssetDatabase.GUIDToAssetPath(guid);
+				var sceneAsset = AssetDatabase.LoadAssetAtPath<SceneAsset>(path);
+				var scene = SceneManager.GetSceneByPath(path);
 				sm_scenes.Add(scene.handle, sceneAsset);
 			}
 		}
@@ -62,6 +50,7 @@ namespace Alf.UnityLocker.Editor
 			{
 				return;
 			}
+			
 			if (Locker.IsAssetLocked(Selection.activeObject))
 			{
 				var locker = Locker.GetAssetLocker(Selection.activeObject);
@@ -88,6 +77,10 @@ namespace Alf.UnityLocker.Editor
 			if (!Locker.HasFetched)
 			{
 				return;
+			}
+			if (sm_scenes == null)
+			{
+				BuildSceneMap();
 			}
 			var asset = EditorUtility.InstanceIDToObject(instanceId) as GameObject;
 

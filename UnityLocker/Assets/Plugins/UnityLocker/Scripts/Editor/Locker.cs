@@ -31,7 +31,6 @@ namespace Alf.UnityLocker.Editor
 			{
 				return sm_lockedAssets;
 			}
-
 			set
 			{
 				sm_lockedAssets = value;
@@ -61,11 +60,7 @@ namespace Alf.UnityLocker.Editor
 			var enumerator = LockedAssets.GetEnumerator();
 			while (enumerator.MoveNext())
 			{
-				if (enumerator.Current.Key == null)
-				{
-					Debug.LogWarning(enumerator.Current + " is null");
-				}
-				else if (IsAssetLockedByMe(enumerator.Current.Key))
+				if (enumerator.Current.Key != null && IsAssetLockedByMe(enumerator.Current.Key))
 				{
 					yield return enumerator.Current.Value;
 				}
@@ -81,7 +76,7 @@ namespace Alf.UnityLocker.Editor
 			var enumerator = LockedAssets.GetEnumerator();
 			while (enumerator.MoveNext())
 			{
-				if (IsAssetLockedBySomeoneElse(enumerator.Current.Key))
+				if (enumerator.Current.Key != null && IsAssetLockedBySomeoneElse(enumerator.Current.Key))
 				{
 					yield return enumerator.Current.Value;
 				}
@@ -95,13 +90,13 @@ namespace Alf.UnityLocker.Editor
 				yield break;
 			}
 			var enumerator = LockedAssets.GetEnumerator();
-			do
+			while (enumerator.MoveNext())
 			{
-				if (IsAssetUnlockedAtLaterCommit(enumerator.Current.Key))
+				if (enumerator.Current.Key != null && IsAssetUnlockedAtLaterCommit(enumerator.Current.Key))
 				{
 					yield return enumerator.Current.Value;
 				}
-			} while (enumerator.MoveNext());
+			}
 		}
 
 		public static void TryLockAssets(UnityEngine.Object[] assets, Action<bool, string> onLockComplete)
