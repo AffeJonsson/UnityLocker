@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using UnityEditor;
-using UnityEngine;
 
 namespace Alf.UnityLocker.Editor
 {
@@ -34,16 +33,22 @@ namespace Alf.UnityLocker.Editor
 		}
 
 		public readonly Dictionary<UnityEngine.Object, AssetLockData> LockData;
+		public readonly Dictionary<int, AssetLockData> LockDataInstanceId;
+		public readonly Dictionary<string, AssetLockData> LockDataGuid;
 
 		public LockedAssetsData(AssetLockData[] rawLockData)
 		{
 			if (LockData == null)
 			{
 				LockData = new Dictionary<UnityEngine.Object, AssetLockData>(rawLockData.Length);
+				LockDataInstanceId = new Dictionary<int, AssetLockData>(rawLockData.Length);
+				LockDataGuid = new Dictionary<string, AssetLockData>(rawLockData.Length);
 			}
 			else
 			{
 				LockData.Clear();
+				LockDataInstanceId.Clear();
+				LockDataGuid.Clear();
 			}
 			foreach (var data in rawLockData)
 			{
@@ -56,6 +61,8 @@ namespace Alf.UnityLocker.Editor
 				if (asset != null)
 				{
 					LockData[asset] = data;
+					LockDataInstanceId[asset.GetInstanceID()] = data;
+					LockDataGuid[data.Guid] = data;
 				}
 			}
 		}

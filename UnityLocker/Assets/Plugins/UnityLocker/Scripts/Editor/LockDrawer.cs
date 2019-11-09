@@ -14,7 +14,6 @@ namespace Alf.UnityLocker.Editor
 
 		static LockDrawer()
 		{
-			// Todo: this is slow. Maybe add two more dicts, one for instanceID and one for GUID?
 			EditorApplication.projectWindowItemOnGUI += OnProjectWindowItemGUI;
 			EditorApplication.hierarchyWindowItemOnGUI += OnHierarchyWindowItemOnGUI;
 			EditorSceneManager.newSceneCreated += OnNewSceneCreated;
