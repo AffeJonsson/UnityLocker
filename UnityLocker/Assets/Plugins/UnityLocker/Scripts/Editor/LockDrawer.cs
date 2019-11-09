@@ -67,7 +67,7 @@ namespace Alf.UnityLocker.Editor
 				var locker = Locker.GetAssetLocker(Selection.activeObject);
 				if (locker != null)
 				{
-					TryDrawLock(new Rect(7, 7, 14, 14), Selection.activeObject);
+					TryDrawLock(new Rect(7, 7, 21, 21), Selection.activeObject, true);
 					EditorGUILayout.LabelField("Asset locked by " + locker, EditorStyles.boldLabel);
 					var isUnlockedAtLaterCommit = Locker.IsAssetUnlockedAtLaterCommit(Selection.activeObject);
 					if (isUnlockedAtLaterCommit)
@@ -94,11 +94,11 @@ namespace Alf.UnityLocker.Editor
 			if (asset == null)
 			{
 				var sceneAsset = sm_scenes[instanceId];
-				TryDrawLock(selectionRect, sceneAsset);
+				TryDrawLock(selectionRect, sceneAsset, false);
 			}
 			else
 			{
-				TryDrawLock(selectionRect, asset);
+				TryDrawLock(selectionRect, asset, false);
 			}
 		}
 
@@ -115,25 +115,25 @@ namespace Alf.UnityLocker.Editor
 				return;
 			}
 			var asset = AssetDatabase.LoadAssetAtPath<Object>(assetPath);
-			TryDrawLock(selectionRect, asset);
+			TryDrawLock(selectionRect, asset, false);
 		}
 
-		private static void TryDrawLock(Rect rect, Object asset)
+		private static void TryDrawLock(Rect rect, Object asset, bool largeTexture)
 		{
 			if (Locker.IsAssetLockedByMe(asset))
 			{
-				GUI.Label(rect, Container.GetLockSettings().LockedByMeIcon);
+				GUI.Label(rect, largeTexture ? Container.GetLockSettings().LockedByMeIconLarge : Container.GetLockSettings().LockedByMeIcon);
 			}
 			else if (Locker.IsAssetLockedBySomeoneElse(asset))
 			{
 				var sha = Locker.GetAssetUnlockCommitSha(asset);
 				if (!string.IsNullOrEmpty(sha))
 				{
-					GUI.Label(rect, Container.GetLockSettings().LockedNowButUnlockedLaterIcon);
+					GUI.Label(rect, largeTexture ? Container.GetLockSettings().LockedNowButUnlockedLaterIconLarge : Container.GetLockSettings().LockedNowButUnlockedLaterIcon);
 				}
 				else
 				{
-					GUI.Label(rect, Container.GetLockSettings().LockIcon);
+					GUI.Label(rect, largeTexture ? Container.GetLockSettings().LockIconLarge : Container.GetLockSettings().LockIcon);
 				}
 			}
 		}

@@ -52,6 +52,9 @@ namespace Alf.UnityLocker.Editor
 			EditorGUILayout.PropertyField(serializedObject.FindProperty("m_lockIcon"));
 			EditorGUILayout.PropertyField(serializedObject.FindProperty("m_lockedByMeIcon"));
 			EditorGUILayout.PropertyField(serializedObject.FindProperty("m_lockedNowButUnlockedLaterIcon"));
+			EditorGUILayout.PropertyField(serializedObject.FindProperty("m_lockIconLarge"));
+			EditorGUILayout.PropertyField(serializedObject.FindProperty("m_lockedByMeIconLarge"));
+			EditorGUILayout.PropertyField(serializedObject.FindProperty("m_lockedNowButUnlockedLaterIconLarge"));
 			EditorGUILayout.PropertyField(serializedObject.FindProperty("m_baseUrl"));
 
 			if (!string.IsNullOrEmpty(serializedObject.FindProperty("m_versionControlName").stringValue))

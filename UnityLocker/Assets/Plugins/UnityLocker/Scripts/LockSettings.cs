@@ -11,6 +11,12 @@ namespace Alf.UnityLocker
 		[SerializeField]
 		private Texture2D m_lockedNowButUnlockedLaterIcon;
 		[SerializeField]
+		private Texture2D m_lockIconLarge;
+		[SerializeField]
+		private Texture2D m_lockedByMeIconLarge;
+		[SerializeField]
+		private Texture2D m_lockedNowButUnlockedLaterIconLarge;
+		[SerializeField]
 		private string m_baseUrl;
 		[SerializeField]
 		private string m_versionControlName;
@@ -59,6 +65,21 @@ namespace Alf.UnityLocker
 		public Texture2D LockedNowButUnlockedLaterIcon
 		{
 			get { return m_lockedNowButUnlockedLaterIcon; }
+		}
+
+		public Texture2D LockIconLarge
+		{
+			get { return m_lockIconLarge; }
+		}
+
+		public Texture2D LockedByMeIconLarge
+		{
+			get { return m_lockedByMeIconLarge; }
+		}
+
+		public Texture2D LockedNowButUnlockedLaterIconLarge
+		{
+			get { return m_lockedNowButUnlockedLaterIconLarge; }
 		}
 
 		public string RepoPath
