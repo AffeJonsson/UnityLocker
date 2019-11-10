@@ -100,7 +100,11 @@ namespace Alf.UnityLocker.Editor
 			{
 				return false;
 			}
-			var filtered = Selection.objects.Where(s => AssetDatabase.Contains(s));
+			var filtered = Selection.objects.Where(s => s != null && AssetDatabase.Contains(s));
+			if (filtered.Count() == 0)
+			{
+				return false;
+			}
 			foreach (var o in filtered)
 			{
 				if (!GetIsLockValid(Selection.activeObject))
@@ -125,7 +129,11 @@ namespace Alf.UnityLocker.Editor
 			{
 				return false;
 			}
-			var filtered = Selection.objects.Where(s => AssetDatabase.Contains(s));
+			var filtered = Selection.objects.Where(s => s != null && AssetDatabase.Contains(s));
+			if (filtered.Count() == 0)
+			{
+				return false;
+			}
 			foreach (var o in filtered)
 			{
 				if (!GetIsRevertLockValid(Selection.activeObject))
@@ -150,7 +158,11 @@ namespace Alf.UnityLocker.Editor
 			{
 				return false;
 			}
-			var filtered = Selection.objects.Where(s => AssetDatabase.Contains(s));
+			var filtered = Selection.objects.Where(s => s != null && AssetDatabase.Contains(s));
+			if (filtered.Count() == 0)
+			{
+				return false;
+			}
 			foreach (var o in filtered)
 			{
 				if (!GetIsUnlockValid(Selection.activeObject))
