@@ -4,7 +4,8 @@
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
@@ -13,7 +14,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_lockIcon: {fileID: 2800000, guid: 09d79424204bc0a47b0cfafef7e41597, type: 3}
   m_lockedByMeIcon: {fileID: 2800000, guid: 70f4b5f785f5ddf488cf2213788d3497, type: 3}
-  m_lockedNowButUnlockedLaterIcon: {fileID: 2800000, guid: c04bf6af44421534ebf51e91e54fab30,
+  m_lockedNowButUnlockedLaterIcon: {fileID: 2800000, guid: ad22adda676e43744b43b7842e105629,
+    type: 3}
+  m_lockIconLarge: {fileID: 2800000, guid: 3cab52a9f392f784f9df01963ef6ed85, type: 3}
+  m_lockedByMeIconLarge: {fileID: 2800000, guid: 1835ddc649154c347b7fa9f69c067aff,
+    type: 3}
+  m_lockedNowButUnlockedLaterIconLarge: {fileID: 2800000, guid: 2fe487a601e19274385d2e497176303c,
     type: 3}
   m_baseUrl: localhost:5000
   m_versionControlName: Git
