@@ -13,23 +13,25 @@ namespace Alf.UnityLocker.Editor
 		{
 			public WWW Www;
 			public Action OnComplete;
+			public Action<string> OnError;
 
-			public WWWAction(WWW www, Action onComplete)
+			public WWWAction(WWW www, Action onComplete, Action<string> onError)
 			{
 				Www = www;
 				OnComplete = onComplete;
+				OnError = onError;
 			}
 		}
 
 		private List<WWWAction> sm_wwwActions = new List<WWWAction>(4);
 
-		public void WaitForWWW(WWW www, Action onComplete)
+		public void WaitForWWW(WWW www, Action onComplete, Action<string> onError)
 		{
 			if (sm_wwwActions.Count == 0)
 			{
 				EditorApplication.update += Update;
 			}
-			sm_wwwActions.Add(new WWWAction(www, onComplete));
+			sm_wwwActions.Add(new WWWAction(www, onComplete, onError));
 		}
 
 		private void Update()
@@ -44,7 +46,20 @@ namespace Alf.UnityLocker.Editor
 					{
 						EditorApplication.update -= Update;
 					}
-					wwwAction.OnComplete();
+					if (string.IsNullOrEmpty(wwwAction.Www.error))
+					{
+						if (wwwAction.OnComplete != null)
+						{
+							wwwAction.OnComplete();
+						}
+					}
+					else
+					{
+						if (wwwAction.OnError != null)
+						{
+							wwwAction.OnError(wwwAction.Www.error);
+						}
+					}
 				}
 			}
 		}

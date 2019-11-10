@@ -13,23 +13,25 @@ namespace Alf.UnityLocker.Editor
 		{
 			public UnityWebRequestAsyncOperation WebRequestOperation;
 			public Action OnComplete;
+			public Action<string> OnError;
 
-			public WebRequestAction(UnityWebRequestAsyncOperation webRequestOperation, Action onComplete)
+			public WebRequestAction(UnityWebRequestAsyncOperation webRequestOperation, Action onComplete, Action<string> onError)
 			{
 				WebRequestOperation = webRequestOperation;
 				OnComplete = onComplete;
+				OnError = onError;
 			}
 		}
 
 		private List<WebRequestAction> sm_webRequestActions = new List<WebRequestAction>(4);
 
-		public void WaitForWebRequest(UnityWebRequest webRequest, Action onComplete)
+		public void WaitForWebRequest(UnityWebRequest webRequest, Action onComplete, Action<string> onError)
 		{
 			if (sm_webRequestActions.Count == 0)
 			{
 				EditorApplication.update += Update;
 			}
-			sm_webRequestActions.Add(new WebRequestAction(webRequest.SendWebRequest(), onComplete));
+			sm_webRequestActions.Add(new WebRequestAction(webRequest.SendWebRequest(), onComplete, onError));
 		}
 
 		private void Update()
@@ -44,7 +46,20 @@ namespace Alf.UnityLocker.Editor
 					{
 						EditorApplication.update -= Update;
 					}
-					webRequestAction.OnComplete();
+					if (webRequestAction.WebRequestOperation.webRequest.isHttpError || webRequestAction.WebRequestOperation.webRequest.isNetworkError)
+					{
+						if (webRequestAction.OnError != null)
+						{
+							webRequestAction.OnError(webRequestAction.WebRequestOperation.webRequest.error);
+						}
+					}
+					else
+					{
+						if (webRequestAction.OnComplete != null)
+						{
+							webRequestAction.OnComplete();
+						}
+					}
 				}
 			}
 		}

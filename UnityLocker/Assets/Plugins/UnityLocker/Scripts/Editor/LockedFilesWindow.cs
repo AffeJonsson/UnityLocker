@@ -126,12 +126,18 @@ namespace Alf.UnityLocker.Editor
 
 		private void RevertLock()
 		{
-			Locker.TryRevertAssetLocks(m_toggledAssets.ToArray(), null);
+			Locker.TryRevertAssetLocks(m_toggledAssets.ToArray(), null, (errorMessage) =>
+			{
+				EditorUtility.DisplayDialog("Asset reverting failed", "Asset reverting failed\n" + errorMessage, "OK");
+			});
 		}
 
 		private void Unlock()
 		{
-			Locker.TryUnlockAssets(m_toggledAssets.ToArray(), null);
+			Locker.TryUnlockAssets(m_toggledAssets.ToArray(), null, (errorMessage) =>
+			{
+				EditorUtility.DisplayDialog("Asset unlocking failed", "Asset unlocking failed\n" + errorMessage, "OK");
+			});
 		}
 	}
 }

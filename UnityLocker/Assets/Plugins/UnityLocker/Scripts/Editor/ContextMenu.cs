@@ -100,10 +100,14 @@ namespace Alf.UnityLocker.Editor
 			{
 				return false;
 			}
-			var filtered = Selection.objects.Where(s => AssetDatabase.Contains(s));
+			var filtered = Selection.objects.Where(s => s != null && AssetDatabase.Contains(s));
+			if (filtered.Count() == 0)
+			{
+				return false;
+			}
 			foreach (var o in filtered)
 			{
-				if (!GetIsLockValid(Selection.activeObject))
+				if (!GetIsLockValid(o))
 				{
 					return false;
 				}
@@ -125,10 +129,14 @@ namespace Alf.UnityLocker.Editor
 			{
 				return false;
 			}
-			var filtered = Selection.objects.Where(s => AssetDatabase.Contains(s));
+			var filtered = Selection.objects.Where(s => s != null && AssetDatabase.Contains(s));
+			if (filtered.Count() == 0)
+			{
+				return false;
+			}
 			foreach (var o in filtered)
 			{
-				if (!GetIsRevertLockValid(Selection.activeObject))
+				if (!GetIsRevertLockValid(o))
 				{
 					return false;
 				}
@@ -150,10 +158,14 @@ namespace Alf.UnityLocker.Editor
 			{
 				return false;
 			}
-			var filtered = Selection.objects.Where(s => AssetDatabase.Contains(s));
+			var filtered = Selection.objects.Where(s => s != null && AssetDatabase.Contains(s));
+			if (filtered.Count() == 0)
+			{
+				return false;
+			}
 			foreach (var o in filtered)
 			{
-				if (!GetIsUnlockValid(Selection.activeObject))
+				if (!GetIsUnlockValid(o))
 				{
 					return false;
 				}
@@ -209,34 +221,25 @@ namespace Alf.UnityLocker.Editor
 
 		private static void TryLockAssets(UnityEngine.Object[] assets)
 		{
-			Locker.TryLockAssets(assets, (success, errorMessage) =>
+			Locker.TryLockAssets(assets, null, (errorMessage) =>
 			{
-				if (!success)
-				{
-					EditorUtility.DisplayDialog("Asset locking failed", "Asset locking failed\n" + errorMessage, "OK");
-				}
+				EditorUtility.DisplayDialog("Asset locking failed", "Asset locking failed\n" + errorMessage, "OK");
 			});
 		}
 
 		private static void TryRevertAssets(UnityEngine.Object[] assets)
 		{
-			Locker.TryRevertAssetLocks(assets, (success, errorMessage) =>
+			Locker.TryRevertAssetLocks(assets, null, (errorMessage) =>
 			{
-				if (!success)
-				{
-					EditorUtility.DisplayDialog("Asset reverting failed", "Asset reverting failed\n" + errorMessage, "OK");
-				}
+				EditorUtility.DisplayDialog("Asset reverting failed", "Asset reverting failed\n" + errorMessage, "OK");
 			});
 		}
 
 		private static void TryUnlockAssets(UnityEngine.Object[] assets)
 		{
-			Locker.TryUnlockAssets(assets, (success, errorMessage) =>
+			Locker.TryUnlockAssets(assets, null, (errorMessage) =>
 			{
-				if (!success)
-				{
-					EditorUtility.DisplayDialog("Asset unlocking failed", "Asset unlocking failed\n" + errorMessage, "OK");
-				}
+				EditorUtility.DisplayDialog("Asset unlocking failed", "Asset unlocking failed\n" + errorMessage, "OK");
 			});
 		}
 	}
