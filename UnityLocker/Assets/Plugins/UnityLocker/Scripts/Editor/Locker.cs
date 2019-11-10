@@ -98,7 +98,11 @@ namespace Alf.UnityLocker.Editor
 				if (IsAnyAssetLocked(assets, out lockedIndex))
 				{
 					Debug.Log("Asset " + assets[lockedIndex] + " is already locked");
-					onLockComplete?.Invoke(false, "Asset is locked by " + sm_lockedAssets[assets[lockedIndex]].LockerName);
+					if(onLockComplete != null)
+					{
+						onLockComplete.Invoke(false, "Asset is locked by " + sm_lockedAssets[assets[lockedIndex]].LockerName);
+					}
+
 					return;
 				}
 				for (var i = 0; i < assets.Length; i++)
@@ -113,12 +117,15 @@ namespace Alf.UnityLocker.Editor
 				}
 				LockAssetsAsync(Container.GetLockSettings().LockAssetsUrl, assets, () =>
 				{
-					onLockComplete?.Invoke(true, null);
+					if (onLockComplete != null)
+					{
+						onLockComplete.Invoke(true, null);
+					}
 				});
 			});
 		}
 
-		public static void TryRevertAssetLocks(UnityEngine.Object[] assets, Action<bool, string> onUnlockComplete)
+		public static void TryRevertAssetLocks(UnityEngine.Object[] assets, Action<bool, string> onRevertComplete)
 		{
 			FetchLockedAssets(() =>
 			{
@@ -126,7 +133,11 @@ namespace Alf.UnityLocker.Editor
 				if (!AreAssetsLockedByMe(assets, out faultyIndex))
 				{
 					Debug.Log("Asset " + assets[faultyIndex] + " is not locked by you!");
-					onUnlockComplete?.Invoke(false, "Asset is not locked by you, it's locked by " + sm_lockedAssets[assets[faultyIndex]].LockerName);
+					if (onRevertComplete != null)
+					{
+						onRevertComplete.Invoke(false, "Asset is not locked by you, it's locked by " + sm_lockedAssets[assets[faultyIndex]].LockerName);
+					}
+
 					return;
 				}
 				for (var i = 0; i < assets.Length; i++)
@@ -141,7 +152,10 @@ namespace Alf.UnityLocker.Editor
 				}
 				RevertAssetLocksAsync(Container.GetLockSettings().RevertAssetsLockUrl, assets, () =>
 				{
-					onUnlockComplete?.Invoke(true, null);
+					if (onRevertComplete != null)
+					{
+						onRevertComplete.Invoke(true, null);
+					}
 				});
 			});
 		}
@@ -154,7 +168,11 @@ namespace Alf.UnityLocker.Editor
 				if (!AreAssetsLockedByMe(assets, out faultyIndex))
 				{
 					Debug.Log("Asset " + assets[faultyIndex] + " is not locked by you!");
-					onUnlockComplete?.Invoke(false, "Asset is not locked by you, it's locked by " + sm_lockedAssets[assets[faultyIndex]].LockerName);
+					if(onUnlockComplete!= null)
+					{
+						onUnlockComplete.Invoke(false, "Asset is not locked by you, it's locked by " + sm_lockedAssets[assets[faultyIndex]].LockerName);
+					}
+
 					return;
 				}
 				for (var i = 0; i < assets.Length; i++)
@@ -168,7 +186,10 @@ namespace Alf.UnityLocker.Editor
 				}
 				UnlockAssetsAsync(Container.GetLockSettings().UnlockAssetsUrl, assets, () =>
 				{
-					onUnlockComplete?.Invoke(true, null);
+					if (onUnlockComplete != null)
+					{
+						onUnlockComplete.Invoke(true, null);
+					}
 				});
 			});
 		}
@@ -187,7 +208,11 @@ namespace Alf.UnityLocker.Editor
 					{
 						OnLockedAssetsChanged();
 					}
-					onAssetsFetched?.Invoke();
+					if(onAssetsFetched != null)
+					{
+						onAssetsFetched.Invoke();
+					}
+
 					return;
 				}
 				var lockData = JsonConvert.DeserializeObject<LockedAssetsData>(data);
@@ -217,7 +242,11 @@ namespace Alf.UnityLocker.Editor
 				{
 					OnLockedAssetsChanged();
 				}
-				onAssetsFetched?.Invoke();
+				if(onAssetsFetched != null)
+				{
+					onAssetsFetched.Invoke();
+				}
+
 				EditorApplication.RepaintHierarchyWindow();
 				EditorApplication.RepaintProjectWindow();
 			});
@@ -315,7 +344,10 @@ namespace Alf.UnityLocker.Editor
 			var webRequest = UnityWebRequest.Get(url);
 			Container.GetWebRequestManager().WaitForWebRequest(webRequest, () =>
 			{
-				onComplete?.Invoke(webRequest.downloadHandler.text);
+				if(onComplete != null)
+				{
+					onComplete.Invoke(webRequest.downloadHandler.text);
+				}
 			});
 #else
 			var www = new WWW(url);

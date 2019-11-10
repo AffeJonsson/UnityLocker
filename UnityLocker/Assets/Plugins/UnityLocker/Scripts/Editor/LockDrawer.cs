@@ -38,7 +38,11 @@ namespace Alf.UnityLocker.Editor
 				var path = AssetDatabase.GUIDToAssetPath(guid);
 				var sceneAsset = AssetDatabase.LoadAssetAtPath<SceneAsset>(path);
 				var scene = SceneManager.GetSceneByPath(path);
-				sm_scenes.Add(scene.handle, sceneAsset);
+#if UNITY_2018_1_OR_NEWER
+				sm_scenes.Add(scene.buildIndex, sceneAsset);
+#else
+				sm_scenes.Add(scene.GetHashCode(), sceneAsset);
+#endif
 			}
 		}
 
@@ -49,7 +53,7 @@ namespace Alf.UnityLocker.Editor
 			{
 				return;
 			}
-			
+
 			if (Locker.IsAssetLocked(Selection.activeObject))
 			{
 				var locker = Locker.GetAssetLocker(Selection.activeObject);
@@ -77,7 +81,7 @@ namespace Alf.UnityLocker.Editor
 			{
 				return;
 			}
-			if (sm_scenes == null)
+			if (sm_scenes == null || sm_scenes.Count == 0)
 			{
 				BuildSceneMap();
 			}
@@ -85,8 +89,11 @@ namespace Alf.UnityLocker.Editor
 
 			if (asset == null)
 			{
-				var sceneAsset = sm_scenes[instanceId];
-				TryDrawLock(selectionRect, sceneAsset, false);
+				SceneAsset sceneAsset;
+				if (sm_scenes.TryGetValue(instanceId, out sceneAsset))
+				{
+					TryDrawLock(selectionRect, sceneAsset, false);
+				}
 			}
 			else
 			{

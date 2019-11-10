@@ -96,6 +96,10 @@ namespace Alf.UnityLocker.Editor
 		[MenuItem(LockMenuName, true)]
 		public static bool ValidateLock()
 		{
+			if (Selection.objects == null || Selection.objects.Length == 0)
+			{
+				return false;
+			}
 			var filtered = Selection.objects.Where(s => AssetDatabase.Contains(s));
 			foreach (var o in filtered)
 			{
@@ -117,6 +121,10 @@ namespace Alf.UnityLocker.Editor
 		[MenuItem(RevertMenuName, true)]
 		public static bool ValidateRevertLock()
 		{
+			if (Selection.objects == null || Selection.objects.Length == 0)
+			{
+				return false;
+			}
 			var filtered = Selection.objects.Where(s => AssetDatabase.Contains(s));
 			foreach (var o in filtered)
 			{
@@ -138,6 +146,10 @@ namespace Alf.UnityLocker.Editor
 		[MenuItem(UnlockMenuName, true)]
 		public static bool ValidateUnlock()
 		{
+			if (Selection.objects == null || Selection.objects.Length == 0)
+			{
+				return false;
+			}
 			var filtered = Selection.objects.Where(s => AssetDatabase.Contains(s));
 			foreach (var o in filtered)
 			{

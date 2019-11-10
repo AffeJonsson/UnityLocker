@@ -105,7 +105,10 @@ namespace Alf.UnityLocker.Editor
 					var rect = EditorGUILayout.GetControlRect();
 					rect.width += 16;
 					var texture = string.IsNullOrEmpty(lockedAsset.UnlockSha) ? Container.GetLockSettings().LockIcon : Container.GetLockSettings().LockedNowButUnlockedLaterIcon;
+					var originalY = rect.y;
+					rect.y += (rect.height / 2 - texture.height / 2) / 2;
 					GUI.Label(rect, texture);
+					rect.y = originalY;
 					rect.x += texture.width;
 					rect.width -= texture.width;
 					var nameRect = new Rect(rect.x, rect.y, longestNameWidth + 5, rect.height);
@@ -115,7 +118,8 @@ namespace Alf.UnityLocker.Editor
 					GUI.enabled = false;
 					EditorGUI.ObjectField(rect, asset, typeof(Object), false);
 					GUI.enabled = true;
-					EditorGUI.LabelField(nameRect, new GUIContent(lockedAsset.LockerName, "Unlocked at commit " + lockedAsset.UnlockSha));
+					var guiContent = lockedAsset.Locked ? new GUIContent(lockedAsset.LockerName) : new GUIContent(lockedAsset.LockerName, "Unlocked at commit " + lockedAsset.UnlockSha);
+					EditorGUI.LabelField(nameRect, guiContent);
 				}
 			}
 		}
