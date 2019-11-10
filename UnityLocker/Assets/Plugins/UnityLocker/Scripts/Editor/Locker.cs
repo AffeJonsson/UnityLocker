@@ -38,7 +38,7 @@ namespace Alf.UnityLocker.Editor
 		{
 			if (Time.realtimeSinceStartup >= sm_nextFetchTime)
 			{
-				FetchLockedAssets(null);
+				FetchLockedAssets(null, null);
 			}
 		}
 
@@ -90,7 +90,7 @@ namespace Alf.UnityLocker.Editor
 			}
 		}
 
-		public static void TryLockAssets(UnityEngine.Object[] assets, Action<bool, string> onLockComplete)
+		public static void TryLockAssets(UnityEngine.Object[] assets, Action onLockComplete, Action<string> onError)
 		{
 			FetchLockedAssets(() =>
 			{
@@ -98,9 +98,9 @@ namespace Alf.UnityLocker.Editor
 				if (IsAnyAssetLocked(assets, out lockedIndex))
 				{
 					Debug.Log("Asset " + assets[lockedIndex] + " is already locked");
-					if(onLockComplete != null)
+					if (onError != null)
 					{
-						onLockComplete.Invoke(false, "Asset is locked by " + sm_lockedAssets[assets[lockedIndex]].LockerName);
+						onError("Asset is locked by " + sm_lockedAssets[assets[lockedIndex]].LockerName);
 					}
 
 					return;
@@ -115,17 +115,11 @@ namespace Alf.UnityLocker.Editor
 				{
 					OnLockedAssetsChanged();
 				}
-				LockAssetsAsync(Container.GetLockSettings().LockAssetsUrl, assets, () =>
-				{
-					if (onLockComplete != null)
-					{
-						onLockComplete.Invoke(true, null);
-					}
-				});
-			});
+				LockAssetsAsync(Container.GetLockSettings().LockAssetsUrl, assets, onLockComplete, onError);
+			}, onError);
 		}
 
-		public static void TryRevertAssetLocks(UnityEngine.Object[] assets, Action<bool, string> onRevertComplete)
+		public static void TryRevertAssetLocks(UnityEngine.Object[] assets, Action onRevertComplete, Action<string> onError)
 		{
 			FetchLockedAssets(() =>
 			{
@@ -133,9 +127,9 @@ namespace Alf.UnityLocker.Editor
 				if (!AreAssetsLockedByMe(assets, out faultyIndex))
 				{
 					Debug.Log("Asset " + assets[faultyIndex] + " is not locked by you!");
-					if (onRevertComplete != null)
+					if (onError != null)
 					{
-						onRevertComplete.Invoke(false, "Asset is not locked by you, it's locked by " + sm_lockedAssets[assets[faultyIndex]].LockerName);
+						onError("Asset is not locked by you, it's locked by " + sm_lockedAssets[assets[faultyIndex]].LockerName);
 					}
 
 					return;
@@ -150,17 +144,11 @@ namespace Alf.UnityLocker.Editor
 				{
 					OnLockedAssetsChanged();
 				}
-				RevertAssetLocksAsync(Container.GetLockSettings().RevertAssetsLockUrl, assets, () =>
-				{
-					if (onRevertComplete != null)
-					{
-						onRevertComplete.Invoke(true, null);
-					}
-				});
-			});
+				RevertAssetLocksAsync(Container.GetLockSettings().RevertAssetsLockUrl, assets, onRevertComplete, onError);
+			}, onError);
 		}
 
-		public static void TryUnlockAssets(UnityEngine.Object[] assets, Action<bool, string> onUnlockComplete)
+		public static void TryUnlockAssets(UnityEngine.Object[] assets, Action onUnlockComplete, Action<string> onError)
 		{
 			FetchLockedAssets(() =>
 			{
@@ -168,9 +156,9 @@ namespace Alf.UnityLocker.Editor
 				if (!AreAssetsLockedByMe(assets, out faultyIndex))
 				{
 					Debug.Log("Asset " + assets[faultyIndex] + " is not locked by you!");
-					if(onUnlockComplete!= null)
+					if (onError != null)
 					{
-						onUnlockComplete.Invoke(false, "Asset is not locked by you, it's locked by " + sm_lockedAssets[assets[faultyIndex]].LockerName);
+						onError("Asset is not locked by you, it's locked by " + sm_lockedAssets[assets[faultyIndex]].LockerName);
 					}
 
 					return;
@@ -184,17 +172,11 @@ namespace Alf.UnityLocker.Editor
 				{
 					OnLockedAssetsChanged();
 				}
-				UnlockAssetsAsync(Container.GetLockSettings().UnlockAssetsUrl, assets, () =>
-				{
-					if (onUnlockComplete != null)
-					{
-						onUnlockComplete.Invoke(true, null);
-					}
-				});
-			});
+				UnlockAssetsAsync(Container.GetLockSettings().UnlockAssetsUrl, assets, onUnlockComplete, onError);
+			}, onError);
 		}
 
-		public static void FetchLockedAssets(Action onAssetsFetched)
+		public static void FetchLockedAssets(Action onAssetsFetched, Action<string> onError)
 		{
 			sm_nextFetchTime = Time.realtimeSinceStartup + TimeBetweenFetches;
 			var url = Container.GetLockSettings().GetLockedAssetsUrl;
@@ -208,7 +190,7 @@ namespace Alf.UnityLocker.Editor
 					{
 						OnLockedAssetsChanged();
 					}
-					if(onAssetsFetched != null)
+					if (onAssetsFetched != null)
 					{
 						onAssetsFetched.Invoke();
 					}
@@ -242,14 +224,14 @@ namespace Alf.UnityLocker.Editor
 				{
 					OnLockedAssetsChanged();
 				}
-				if(onAssetsFetched != null)
+				if (onAssetsFetched != null)
 				{
 					onAssetsFetched.Invoke();
 				}
 
 				EditorApplication.RepaintHierarchyWindow();
 				EditorApplication.RepaintProjectWindow();
-			});
+			}, onError);
 		}
 
 		public static bool IsAssetLocked(UnityEngine.Object asset)
@@ -337,76 +319,79 @@ namespace Alf.UnityLocker.Editor
 			return string.Empty;
 		}
 
-		private static void FecthLockedAssetsAsync(string url, Action<string> onComplete)
+		private static void FecthLockedAssetsAsync(string url, Action<string> onComplete, Action<string> onError)
 		{
 #if UNITY_2018_4_OR_NEWER
 
 			var webRequest = UnityWebRequest.Get(url);
 			Container.GetWebRequestManager().WaitForWebRequest(webRequest, () =>
 			{
-				if(onComplete != null)
+				if (onComplete != null)
 				{
-					onComplete.Invoke(webRequest.downloadHandler.text);
+					onComplete(webRequest.downloadHandler.text);
 				}
-			});
+			}, onError);
 #else
 			var www = new WWW(url);
 			Container.GetWWWManager().WaitForWWW(www, () =>
 			{
-				onComplete?.Invoke(www.text);
-			});
+				if (onComplete != null)
+				{
+					onComplete(www.text);
+				}
+			}, onError);
 #endif
 		}
 
-		private static void LockAssetsAsync(string url, UnityEngine.Object[] assets, Action onComplete)
+		private static void LockAssetsAsync(string url, UnityEngine.Object[] assets, Action onComplete, Action<string> onError)
 		{
 #if UNITY_2018_4_OR_NEWER
 			var form = new WWWForm();
 			form.AddField("Guid", JsonConvert.SerializeObject(assets.Select(a => AssetDatabase.AssetPathToGUID(AssetDatabase.GetAssetPath(a))).ToArray()));
 			form.AddField("LockerName", Container.GetLockSettings().Username);
 			var webRequest = UnityWebRequest.Post(url, form);
-			Container.GetWebRequestManager().WaitForWebRequest(webRequest, onComplete);
+			Container.GetWebRequestManager().WaitForWebRequest(webRequest, onComplete, onError);
 #else
 			var form = new WWWForm();
 			form.AddField("Guid", JsonConvert.SerializeObject(assets.Select(a => AssetDatabase.AssetPathToGUID(AssetDatabase.GetAssetPath(a))).ToArray()));
 			form.AddField("LockerName", Container.GetLockSettings().Username);
 			var www = new WWW(url, form);
-			Container.GetWWWManager().WaitForWWW(www, onComplete);
+			Container.GetWWWManager().WaitForWWW(www, onComplete, onError);
 #endif
 		}
 
-		private static void RevertAssetLocksAsync(string url, UnityEngine.Object[] assets, Action onComplete)
+		private static void RevertAssetLocksAsync(string url, UnityEngine.Object[] assets, Action onComplete, Action<string> onError)
 		{
 #if UNITY_2018_4_OR_NEWER
 			var form = new WWWForm();
 			form.AddField("Guid", JsonConvert.SerializeObject(assets.Select(a => AssetDatabase.AssetPathToGUID(AssetDatabase.GetAssetPath(a))).ToArray()));
 			var webRequest = UnityWebRequest.Post(url, form);
-			Container.GetWebRequestManager().WaitForWebRequest(webRequest, onComplete);
+			Container.GetWebRequestManager().WaitForWebRequest(webRequest, onComplete, onError);
 #else
 			var form = new WWWForm();
 			form.AddField("Guid", JsonConvert.SerializeObject(assets.Select(a => AssetDatabase.AssetPathToGUID(AssetDatabase.GetAssetPath(a))).ToArray()));
 			var www = new WWW(url, form);
-			Container.GetWWWManager().WaitForWWW(www, onComplete);
+			Container.GetWWWManager().WaitForWWW(www, onComplete, onError);
 #endif
 		}
 
-		private static void UnlockAssetsAsync(string url, UnityEngine.Object[] assets, Action onComplete)
+		private static void UnlockAssetsAsync(string url, UnityEngine.Object[] assets, Action onComplete, Action<string> onError)
 		{
 #if UNITY_2018_4_OR_NEWER
 			var form = new WWWForm();
 			form.AddField("Guid", JsonConvert.SerializeObject(assets.Select(a => AssetDatabase.AssetPathToGUID(AssetDatabase.GetAssetPath(a))).ToArray()));
 			form.AddField("Sha", Container.GetVersionControlHandler().GetShaOfHead());
 			var webRequest = UnityWebRequest.Post(url, form);
-			Container.GetWebRequestManager().WaitForWebRequest(webRequest, onComplete);
+			Container.GetWebRequestManager().WaitForWebRequest(webRequest, onComplete, onError);
 #else
 			var form = new WWWForm();
 			form.AddField("Guid", JsonConvert.SerializeObject(assets.Select(a => AssetDatabase.AssetPathToGUID(AssetDatabase.GetAssetPath(a))).ToArray()));
 			form.AddField("Sha", Container.GetVersionControlHandler().GetShaOfHead());
 			var www = new WWW(url, form);
-			Container.GetWWWManager().WaitForWWW(www, onComplete);
+			Container.GetWWWManager().WaitForWWW(www, onComplete, onError);
 #endif
 		}
-		
+
 		private static bool IsAssetLockedByMeThurough(UnityEngine.Object asset)
 		{
 			if (!HasFetched)
