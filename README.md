@@ -7,13 +7,16 @@ UnityLocker needs a connection to some kind of server instance, where lock data 
 Inside Unity, right clicking an asset presents a context menu which contains the buttons "Lock", "Revert Lock" and "Unlock".
 
 ### Lock
-Locking an assets marks the assets, and other users cannot save that particular asset. To lock a file, either right click an asset and select "Lock", or select an asset and via the Asset menu, select "Lock".
+Locking an assets marks the selected assets, and other users cannot save those particular assets. To lock a file, either right click an asset and select "Lock", or select an asset and via the Asset menu, select "Lock". Scenes can also be locked by right clicking them in the hierarchy, and selecting "Lock".
 
 ### Revert Lock
-Reverting a file is used when you either locked a file by accident, or locked a file but never changed it. To unlock a file, either right click an asset and select "Revert Lock", or select an asset and via the Asset menu, select "Revert Lock".
+Reverting a file is used when you either locked a file by accident, or locked a file but never changed it. To unlock a file, either right click an asset and select "Revert Lock", or select an asset and via the Asset menu, select "Revert Lock". Scene locks can also be reverted by right clicking them in the hierarchy, and selecting "Revert Lock".
 
 ### Unlock
-Unlocking a file marks the asset as unlocked for users above your current commit. This means that they need to have your changes merged into their branch before being able to save the asset and/or lock the file. To unlock a file, either right click an asset and select "Unlock", or select an asset and via the Asset menu, select "Unlock".
+Unlocking a file marks the asset as unlocked for users above your current commit. This means that they need to have your changes merged into their branch before being able to save the asset and/or lock the file. To unlock a file, either right click an asset and select "Unlock", or select an asset and via the Asset menu, select "Unlock". Scenes can also be unlocked by right clicking them in the hierarchy, and selecting "Unlock".
+
+## Locked Files Window
+To open, click Window/Locked Files. Here, the files locked by you and others are displayed.
 
 ## Installation
 1. Download the sample server and run Starter.bat. This will start a flask app on your device that listenes to port 5000.
@@ -36,6 +39,6 @@ Unlocking a file marks the asset as unlocked for users above your current commit
 
 `lockerjsondotnet.unitypackage` This is the only package that UnityLocker is dependent on. If your project already has a JSON.NET plugin, this is not needed. (https://github.com/JamesNK/Newtonsoft.Json, MIT licence)
 
-`lockerversioncontrolgit.unitypackage` This adds the ability to use Git as your version control handler.
+`lockerversioncontrolgit.unitypackage` This adds the ability to use Git as your version control handler. (.NET 4.6 needed)
 
-`lockerlibgit2sharp.unitypackage` This is needed for the Git version control handler to work. If your project already has a LibGit2Sharp plugin, this is not needed. (https://github.com/libgit2/libgit2sharp, MIT Licence)
+`lockerlibgit2sharp.unitypackage` This is needed for the Git version control handler to work. If your project already has a LibGit2Sharp plugin, this is not needed. (https://github.com/libgit2/libgit2sharp, MIT Licence) (.NET 4.6 needed)
