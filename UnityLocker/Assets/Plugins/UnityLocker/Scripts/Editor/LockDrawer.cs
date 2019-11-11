@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Reflection;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
@@ -10,40 +10,18 @@ namespace Alf.UnityLocker.Editor
 	public static class LockDrawer
 	{
 		private static int sm_currentSceneIndex;
-		private static Dictionary<int, SceneAsset> sm_scenes;
+		private static MethodInfo sm_getSceneMethod;
 
 		static LockDrawer()
 		{
+			sm_getSceneMethod = typeof(EditorSceneManager).GetMethod("GetSceneByHandle", BindingFlags.Static | BindingFlags.NonPublic);
 			EditorApplication.projectWindowItemOnGUI += OnProjectWindowItemGUI;
 			EditorApplication.hierarchyWindowItemOnGUI += OnHierarchyWindowItemOnGUI;
-			EditorSceneManager.newSceneCreated += OnNewSceneCreated;
 
 			// finishedDefaultHeaderGUI was added in 2018.2
 #if UNITY_2018_2_OR_NEWER
 			UnityEditor.Editor.finishedDefaultHeaderGUI += OnFinishedHeaderGUI;
 #endif
-		}
-
-		private static void OnNewSceneCreated(Scene scene, NewSceneSetup setup, NewSceneMode mode)
-		{
-			BuildSceneMap();
-		}
-
-		private static void BuildSceneMap()
-		{
-			var guids = AssetDatabase.FindAssets("t:Scene");
-			sm_scenes = new Dictionary<int, SceneAsset>(guids.Length);
-			foreach (var guid in guids)
-			{
-				var path = AssetDatabase.GUIDToAssetPath(guid);
-				var sceneAsset = AssetDatabase.LoadAssetAtPath<SceneAsset>(path);
-				var scene = SceneManager.GetSceneByPath(path);
-#if UNITY_2018_1_OR_NEWER
-				sm_scenes.Add(scene.buildIndex, sceneAsset);
-#else
-				sm_scenes.Add(scene.GetHashCode(), sceneAsset);
-#endif
-			}
 		}
 
 #if UNITY_2018_2_OR_NEWER
@@ -81,19 +59,13 @@ namespace Alf.UnityLocker.Editor
 			{
 				return;
 			}
-			if (sm_scenes == null || sm_scenes.Count == 0)
-			{
-				BuildSceneMap();
-			}
 			var asset = EditorUtility.InstanceIDToObject(instanceId) as GameObject;
 
 			if (asset == null)
 			{
-				SceneAsset sceneAsset;
-				if (sm_scenes.TryGetValue(instanceId, out sceneAsset))
-				{
-					TryDrawLock(selectionRect, sceneAsset, false);
-				}
+				var scene = (Scene)sm_getSceneMethod.Invoke(null, new object[] { instanceId });
+				var sceneAsset = AssetDatabase.LoadAssetAtPath<SceneAsset>(scene.path);
+				TryDrawLock(selectionRect, sceneAsset, false);
 			}
 			else
 			{
