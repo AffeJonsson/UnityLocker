@@ -14,53 +14,38 @@ namespace Alf.UnityLocker.Editor
 		private const string OpenSettingsFileMenuName = "Tools/Open Locker Settings File";
 		private const int Priority = 600;
 
-		static ContextMenu()
+#if !UNITY_2019_1_OR_NEWER
+#if UNITY_2018_3_OR_NEWER
+		private static 	Type sm_sceneHierarchyType = null;
+#endif
+		private static Type sm_treeViewType = null;
+		private static Type sm_sceneHierarchyWindowType = null;
+
+		private static void ContinusTryCreateMenu()
 		{
-#if UNITY_2019_1_OR_NEWER
-			SceneHierarchyHooks.addItemsToSceneHeaderContextMenu += ((menu, scene) => OnAddMenuItem(menu, scene));
-#elif UNITY_2017_1_OR_NEWER
-			//Unity 2017.1 to 2018.4 doesnt have SceneHierarchyHooks, so therefore we do some reflection magic to add lock buttons to hierarchy scene context menu.
-			//Unity 2017.1 to 2018.2 doesnt have SceneHierarchy, so we need to do different reflection magic depending on version
-			var context = System.Threading.Tasks.TaskScheduler.FromCurrentSynchronizationContext();
-#if UNITY_2018_3_OR_NEWER
-			Type sceneHierarchyType = null;
-#endif
-			Type treeViewType = null;
-			Type sceneHierarchyWindowType = null;
-			System.Threading.Tasks.Task.Run(() =>
+			try
 			{
-				var assemblies = AppDomain.CurrentDomain.GetAssemblies();
-				foreach (var assembly in assemblies)
+				var sceneHierarchyWindow = EditorWindow.GetWindow(sm_sceneHierarchyWindowType);
+				if (sceneHierarchyWindow == null)
 				{
-					if (assembly.FullName.StartsWith("UnityEditor"))
-					{
-#if UNITY_2018_3_OR_NEWER
-						sceneHierarchyType = assembly.GetType("UnityEditor.SceneHierarchy");
-#endif
-						treeViewType = assembly.GetType("UnityEditor.IMGUI.Controls.TreeViewController");
-						sceneHierarchyWindowType = assembly.GetType("UnityEditor.SceneHierarchyWindow");
-						break;
-					}
+					return;
 				}
-			}).ContinueWith((t) =>
-			{
-				var sceneHierarchyWindow = EditorWindow.GetWindow(sceneHierarchyWindowType);
 				var getSceneByHandleMethod = typeof(UnityEditor.SceneManagement.EditorSceneManager).GetMethod("GetSceneByHandle", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static);
 
 #if UNITY_2018_3_OR_NEWER
-				var sceneHierarchyField = sceneHierarchyWindowType.GetField("m_SceneHierarchy", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+				var sceneHierarchyField = sm_sceneHierarchyWindowType.GetField("m_SceneHierarchy", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
 				var sceneHierarchy = sceneHierarchyField.GetValue(sceneHierarchyWindow);
-				var treeViewField = sceneHierarchyType.GetField("m_TreeView", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-				var createMultiSceneHeaderContextClickMethod = sceneHierarchyType.GetMethod("CreateMultiSceneHeaderContextClick", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-				var isSceneHeaderInHierarchyWindowMethod = sceneHierarchyType.GetMethod("IsSceneHeaderInHierarchyWindow", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
+				var treeViewField = sm_sceneHierarchyType.GetField("m_TreeView", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+				var createMultiSceneHeaderContextClickMethod = sm_sceneHierarchyType.GetMethod("CreateMultiSceneHeaderContextClick", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+				var isSceneHeaderInHierarchyWindowMethod = sm_sceneHierarchyType.GetMethod("IsSceneHeaderInHierarchyWindow", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
 				var treeView = treeViewField.GetValue(sceneHierarchy);
 #else
-				var treeViewField = sceneHierarchyWindowType.GetField("m_TreeView", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-				var createMultiSceneHeaderContextClickMethod = sceneHierarchyWindowType.GetMethod("CreateMultiSceneHeaderContextClick", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-				var isSceneHeaderInHierarchyWindowMethod = sceneHierarchyWindowType.GetMethod("IsSceneHeaderInHierarchyWindow", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
+				var treeViewField = sm_sceneHierarchyWindowType.GetField("m_TreeView", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+				var createMultiSceneHeaderContextClickMethod = sm_sceneHierarchyWindowType.GetMethod("CreateMultiSceneHeaderContextClick", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+				var isSceneHeaderInHierarchyWindowMethod = sm_sceneHierarchyWindowType.GetMethod("IsSceneHeaderInHierarchyWindow", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
 				var treeView = treeViewField.GetValue(sceneHierarchyWindow);
 #endif
-				var property = treeViewType.GetProperty("contextClickItemCallback", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance);
+				var property = sm_treeViewType.GetProperty("contextClickItemCallback", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance);
 				var e = (Action<int>)property.GetValue(treeView);
 				e = (id) =>
 				{
@@ -82,6 +67,41 @@ namespace Alf.UnityLocker.Editor
 					}
 				};
 				property.SetValue(treeView, e);
+			}
+			catch (Exception e)
+			{
+				return;
+			}
+			EditorApplication.update -= ContinusTryCreateMenu;
+		}
+#endif
+		static ContextMenu()
+		{
+#if UNITY_2019_1_OR_NEWER
+			SceneHierarchyHooks.addItemsToSceneHeaderContextMenu += ((menu, scene) => OnAddMenuItem(menu, scene));
+#elif UNITY_2017_1_OR_NEWER
+			//Unity 2017.1 to 2018.4 doesnt have SceneHierarchyHooks, so therefore we do some reflection magic to add lock buttons to hierarchy scene context menu.
+			//Unity 2017.1 to 2018.2 doesnt have SceneHierarchy, so we need to do different reflection magic depending on version
+			var context = System.Threading.Tasks.TaskScheduler.FromCurrentSynchronizationContext();
+
+			System.Threading.Tasks.Task.Run(() =>
+			{
+				var assemblies = AppDomain.CurrentDomain.GetAssemblies();
+				foreach (var assembly in assemblies)
+				{
+					if (assembly.FullName.StartsWith("UnityEditor"))
+					{
+#if UNITY_2018_3_OR_NEWER
+						sm_sceneHierarchyType = assembly.GetType("UnityEditor.SceneHierarchy");
+#endif
+						sm_treeViewType = assembly.GetType("UnityEditor.IMGUI.Controls.TreeViewController");
+						sm_sceneHierarchyWindowType = assembly.GetType("UnityEditor.SceneHierarchyWindow");
+						break;
+					}
+				}
+			}).ContinueWith((t) =>
+			{
+				EditorApplication.update += ContinusTryCreateMenu;
 			}, context);
 #endif
 		}

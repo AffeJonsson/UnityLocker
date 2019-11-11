@@ -13,6 +13,13 @@ namespace Alf.UnityLocker.Editor
 	[InitializeOnLoad]
 	public static class LockDrawer
 	{
+		private enum DrawType
+		{
+			SmallIcon = 1 << 0,
+			LargeIcon = 1 << 1,
+			Background = 1 << 2
+		}
+
 		private static int sm_currentSceneIndex;
 		private static MethodInfo sm_getSceneMethod;
 #if UNITY_2018_3_OR_NEWER
@@ -61,7 +68,7 @@ namespace Alf.UnityLocker.Editor
 				var locker = Locker.GetAssetLocker(Selection.activeObject);
 				if (locker != null)
 				{
-					TryDrawLock(sm_headerRect, Selection.activeObject, true, false);
+					TryDrawLock(sm_headerRect, Selection.activeObject, DrawType.LargeIcon);
 					EditorGUILayout.LabelField("Asset locked by " + locker, EditorStyles.boldLabel);
 					var isUnlockedAtLaterCommit = Locker.IsAssetLockedNowButUnlockedAtLaterCommit(Selection.activeObject);
 					if (isUnlockedAtLaterCommit)
@@ -89,7 +96,7 @@ namespace Alf.UnityLocker.Editor
 			{
 				var scene = (Scene)sm_getSceneMethod.Invoke(null, new object[] { instanceId });
 				var sceneAsset = AssetDatabase.LoadAssetAtPath<SceneAsset>(scene.path);
-				TryDrawLock(selectionRect, sceneAsset, false, true);
+				TryDrawLock(selectionRect, sceneAsset, DrawType.Background);
 			}
 			else
 			{
@@ -102,7 +109,7 @@ namespace Alf.UnityLocker.Editor
 				else
 #endif
 				{
-					TryDrawLock(selectionRect, asset, false, false);
+					TryDrawLock(selectionRect, asset, DrawType.Background);
 				}
 			}
 		}
@@ -120,42 +127,69 @@ namespace Alf.UnityLocker.Editor
 				return;
 			}
 			var asset = AssetDatabase.LoadAssetAtPath<Object>(assetPath);
-			TryDrawLock(selectionRect, asset, false, false);
+			TryDrawLock(selectionRect, asset, DrawType.SmallIcon);
 		}
 
-		private static void TryDrawLock(Rect rect, Object asset, bool largeTexture, bool drawBackground)
+		private static void TryDrawLock(Rect rect, Object asset, DrawType drawType)
 		{
 			if (Locker.IsAssetLockedByMe(asset))
 			{
-				DrawBackground(rect, Color.green, 0.05f, drawBackground);
-				GUI.Label(rect, largeTexture ? Container.GetLockSettings().LockedByMeIconLarge : Container.GetLockSettings().LockedByMeIcon);
+				if ((drawType & DrawType.Background) != 0)
+				{
+					DrawBackground(rect, Color.green, 0.05f);
+				}
+				if ((drawType & DrawType.SmallIcon) != 0)
+				{
+					GUI.Label(rect, Container.GetLockSettings().LockedByMeIcon);
+				}
+				if ((drawType & DrawType.LargeIcon) != 0)
+				{
+					GUI.Label(rect, Container.GetLockSettings().LockedByMeIconLarge);
+				}
 			}
 			else if (Locker.IsAssetLockedBySomeoneElse(asset))
 			{
-				DrawBackground(rect, Color.red, 0.05f, drawBackground);
-				GUI.Label(rect, largeTexture ? Container.GetLockSettings().LockIconLarge : Container.GetLockSettings().LockIcon);
+				if ((drawType & DrawType.Background) != 0)
+				{
+					DrawBackground(rect, Color.red, 0.05f);
+				}
+				if ((drawType & DrawType.SmallIcon) != 0)
+				{
+					GUI.Label(rect, Container.GetLockSettings().LockIcon);
+				}
+				if ((drawType & DrawType.LargeIcon) != 0)
+				{
+					GUI.Label(rect, Container.GetLockSettings().LockIconLarge);
+				}
 			}
 			else if (Locker.IsAssetLockedNowButUnlockedAtLaterCommit(asset))
 			{
-				DrawBackground(rect, Color.yellow, 0.05f, drawBackground);
-				GUI.Label(rect, largeTexture ? Container.GetLockSettings().LockedNowButUnlockedLaterIconLarge : Container.GetLockSettings().LockedNowButUnlockedLaterIcon);
+				if ((drawType & DrawType.Background) != 0)
+				{
+					DrawBackground(rect, Color.yellow, 0.05f);
+				}
+				if ((drawType & DrawType.SmallIcon) != 0)
+				{
+					GUI.Label(rect, Container.GetLockSettings().LockedNowButUnlockedLaterIcon);
+				}
+				if ((drawType & DrawType.LargeIcon) != 0)
+				{
+					GUI.Label(rect, Container.GetLockSettings().LockedNowButUnlockedLaterIconLarge);
+				}
 			}
 		}
 
-		private static void DrawBackground(Rect rect, Color color, float alpha, bool drawBackground)
+		private static void DrawBackground(Rect rect, Color color, float alpha)
 		{
-			if (drawBackground)
-			{
-				color.a = EditorGUIUtility.isProSkin ? alpha : alpha * 2f;
+			color.a = EditorGUIUtility.isProSkin ? alpha : alpha * 2f;
 
-				const float marginX = 16f;
-				const float marginY = 1f;
-				rect.x -= marginX;
-				rect.y += marginY;
-				rect.width += marginX * 2f;
+			const float marginX = 16f;
+			const float marginY = 1f;
+			rect.x -= marginX;
+			rect.y += marginY;
+			rect.width += marginX * 2f;
 
-				EditorGUI.DrawRect(rect, color);
-			}
+			EditorGUI.DrawRect(rect, color);
 		}
 	}
 }
