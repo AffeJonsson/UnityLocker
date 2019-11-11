@@ -51,7 +51,7 @@ namespace Alf.UnityLocker.Editor
 			var enumerator = sm_lockedAssets.GetEnumerator();
 			while (enumerator.MoveNext())
 			{
-				if (enumerator.Current.Key != null && IsAssetLockedByMe(enumerator.Current.Key))
+				if (enumerator.Current.Key != null && sm_assetsLockedByMe.Contains(enumerator.Current.Key))
 				{
 					yield return enumerator.Current.Value;
 				}
@@ -67,14 +67,14 @@ namespace Alf.UnityLocker.Editor
 			var enumerator = sm_lockedAssets.GetEnumerator();
 			while (enumerator.MoveNext())
 			{
-				if (enumerator.Current.Key != null && IsAssetLockedBySomeoneElse(enumerator.Current.Key))
+				if (enumerator.Current.Key != null && sm_assetsLockedBySomeoneElse.Contains(enumerator.Current.Key))
 				{
 					yield return enumerator.Current.Value;
 				}
 			}
 		}
 
-		public static IEnumerable<LockedAssetsData.AssetLockData> GetAssetsUnlockedLater()
+		public static IEnumerable<LockedAssetsData.AssetLockData> GetAssetsLockedNowButUnlockedLater()
 		{
 			if (sm_lockedAssets == null || sm_lockedAssets.Count == 0)
 			{
@@ -83,7 +83,7 @@ namespace Alf.UnityLocker.Editor
 			var enumerator = sm_lockedAssets.GetEnumerator();
 			while (enumerator.MoveNext())
 			{
-				if (enumerator.Current.Key != null && IsAssetUnlockedAtLaterCommit(enumerator.Current.Key))
+				if (enumerator.Current.Key != null && sm_assetsLockedButUnlockedLater.Contains(enumerator.Current.Key))
 				{
 					yield return enumerator.Current.Value;
 				}
@@ -210,11 +210,11 @@ namespace Alf.UnityLocker.Editor
 					}
 					else
 					{
-						if (IsAssetUnlockedAtLaterCommit(asset))
+						if (IsAssetLockedNowButUnlockedAtLaterCommitThurough(asset))
 						{
 							sm_assetsLockedButUnlockedLater.Add(asset);
 						}
-						if (IsAssetLockedBySomeoneElseThurough(asset))
+						else if (IsAssetLockedBySomeoneElseThurough(asset))
 						{
 							sm_assetsLockedBySomeoneElse.Add(asset);
 						}
@@ -234,15 +234,6 @@ namespace Alf.UnityLocker.Editor
 			}, onError);
 		}
 
-		public static bool IsAssetLocked(UnityEngine.Object asset)
-		{
-			if (!HasFetched)
-			{
-				return true;
-			}
-			return sm_assetsLockedByMe.Contains(asset) || sm_assetsLockedBySomeoneElse.Contains(asset);
-		}
-
 		public static bool IsAssetLockedByMe(UnityEngine.Object asset)
 		{
 			if (!HasFetched)
@@ -252,7 +243,55 @@ namespace Alf.UnityLocker.Editor
 			return sm_assetsLockedByMe.Contains(asset);
 		}
 
-		public static bool AreAssetsLockedByMe(UnityEngine.Object[] assets, out int fautlyIndex)
+		public static bool IsAssetLockedBySomeoneElse(UnityEngine.Object asset)
+		{
+			if (!HasFetched)
+			{
+				return true;
+			}
+			return sm_assetsLockedBySomeoneElse.Contains(asset);
+		}
+
+		public static bool IsAssetLockedNowButUnlockedAtLaterCommit(UnityEngine.Object asset)
+		{
+			if (!HasFetched)
+			{
+				return true;
+			}
+			return sm_assetsLockedButUnlockedLater.Contains(asset);
+		}
+
+		public static string GetAssetLocker(UnityEngine.Object asset)
+		{
+			LockedAssetsData.AssetLockData lockData;
+			if (sm_lockedAssets.TryGetValue(asset, out lockData))
+			{
+				return lockData.LockerName;
+			}
+			return null;
+		}
+
+		public static string GetAssetUnlockCommitSha(UnityEngine.Object asset)
+		{
+			LockedAssetsData.AssetLockData lockData;
+			if (sm_lockedAssets.TryGetValue(asset, out lockData))
+			{
+				return lockData.UnlockSha ?? string.Empty;
+			}
+			return string.Empty;
+		}
+
+		#region Private API
+		private static bool IsAssetLocked(UnityEngine.Object asset)
+		{
+			if (!HasFetched)
+			{
+				return true;
+			}
+			return sm_assetsLockedByMe.Contains(asset) || sm_assetsLockedBySomeoneElse.Contains(asset);
+		}
+
+		private static bool AreAssetsLockedByMe(UnityEngine.Object[] assets, out int fautlyIndex)
 		{
 			fautlyIndex = -1;
 			for (var i = 0; i < assets.Length; i++)
@@ -266,7 +305,7 @@ namespace Alf.UnityLocker.Editor
 			return true;
 		}
 
-		public static bool IsAnyAssetLocked(UnityEngine.Object[] assets, out int lockedIndex)
+		private static bool IsAnyAssetLocked(UnityEngine.Object[] assets, out int lockedIndex)
 		{
 			lockedIndex = -1;
 			for (var i = 0; i < assets.Length; i++)
@@ -278,45 +317,6 @@ namespace Alf.UnityLocker.Editor
 				}
 			}
 			return false;
-		}
-
-		public static bool IsAssetLockedBySomeoneElse(UnityEngine.Object asset)
-		{
-			if (!HasFetched)
-			{
-				return true;
-			}
-			return sm_assetsLockedBySomeoneElse.Contains(asset);
-		}
-
-		public static string GetAssetLocker(UnityEngine.Object asset)
-		{
-			LockedAssetsData.AssetLockData lockData;
-			if (sm_lockedAssets.TryGetValue(asset, out lockData))
-			{
-				return lockData.LockerName;
-			}
-			return null;
-		}
-
-		public static bool IsAssetUnlockedAtLaterCommit(UnityEngine.Object asset)
-		{
-			LockedAssetsData.AssetLockData lockData;
-			if (sm_lockedAssets.TryGetValue(asset, out lockData))
-			{
-				return !lockData.Locked;
-			}
-			return false;
-		}
-
-		public static string GetAssetUnlockCommitSha(UnityEngine.Object asset)
-		{
-			LockedAssetsData.AssetLockData lockData;
-			if (sm_lockedAssets.TryGetValue(asset, out lockData))
-			{
-				return lockData.UnlockSha ?? string.Empty;
-			}
-			return string.Empty;
 		}
 
 		private static void FecthLockedAssetsAsync(string url, Action<string> onComplete, Action<string> onError)
@@ -419,5 +419,20 @@ namespace Alf.UnityLocker.Editor
 			}
 			return false;
 		}
+
+		private static bool IsAssetLockedNowButUnlockedAtLaterCommitThurough(UnityEngine.Object asset)
+		{
+			if (!HasFetched)
+			{
+				return true;
+			}
+			LockedAssetsData.AssetLockData lockData;
+			if (sm_lockedAssets.TryGetValue(asset, out lockData))
+			{
+				return !lockData.Locked && !string.IsNullOrEmpty(lockData.UnlockSha) && !Container.GetVersionControlHandler().IsCommitChildOfHead(lockData.UnlockSha) && lockData.LockerName != Container.GetLockSettings().Username;
+			}
+			return false;
+		}
+		#endregion
 	}
 }

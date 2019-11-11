@@ -30,7 +30,7 @@ namespace Alf.UnityLocker.Editor
 			PrefabStage.prefabStageClosing += OnPrefabStageClosing;
 			sm_currentStage = PrefabStageUtility.GetCurrentPrefabStage();
 #endif
-			
+
 #if UNITY_2018_2_OR_NEWER
 			UnityEditor.Editor.finishedDefaultHeaderGUI += OnFinishedHeaderGUI;
 #endif
@@ -56,14 +56,14 @@ namespace Alf.UnityLocker.Editor
 				return;
 			}
 
-			if (Locker.IsAssetLocked(Selection.activeObject))
+			if (Locker.IsAssetLockedByMe(Selection.activeObject) || Locker.IsAssetLockedBySomeoneElse(Selection.activeObject) || Locker.IsAssetLockedNowButUnlockedAtLaterCommit(Selection.activeObject))
 			{
 				var locker = Locker.GetAssetLocker(Selection.activeObject);
 				if (locker != null)
 				{
-					TryDrawLock(new Rect(7, 7, 21, 21), Selection.activeObject, true, false);
+					TryDrawLock(sm_headerRect, Selection.activeObject, true, false);
 					EditorGUILayout.LabelField("Asset locked by " + locker, EditorStyles.boldLabel);
-					var isUnlockedAtLaterCommit = Locker.IsAssetUnlockedAtLaterCommit(Selection.activeObject);
+					var isUnlockedAtLaterCommit = Locker.IsAssetLockedNowButUnlockedAtLaterCommit(Selection.activeObject);
 					if (isUnlockedAtLaterCommit)
 					{
 						var sha = Locker.GetAssetUnlockCommitSha(Selection.activeObject);
@@ -132,16 +132,13 @@ namespace Alf.UnityLocker.Editor
 			}
 			else if (Locker.IsAssetLockedBySomeoneElse(asset))
 			{
-				if (Locker.IsAssetLocked(asset))
-				{
-					DrawBackground(rect, Color.red, 0.05f, drawBackground);
-					GUI.Label(rect, largeTexture ? Container.GetLockSettings().LockIconLarge : Container.GetLockSettings().LockIcon);
-				}
-				else
-				{
-					DrawBackground(rect, Color.yellow, 0.05f, drawBackground);
-					GUI.Label(rect, largeTexture ? Container.GetLockSettings().LockedNowButUnlockedLaterIconLarge : Container.GetLockSettings().LockedNowButUnlockedLaterIcon);
-				}
+				DrawBackground(rect, Color.red, 0.05f, drawBackground);
+				GUI.Label(rect, largeTexture ? Container.GetLockSettings().LockIconLarge : Container.GetLockSettings().LockIcon);
+			}
+			else if (Locker.IsAssetLockedNowButUnlockedAtLaterCommit(asset))
+			{
+				DrawBackground(rect, Color.yellow, 0.05f, drawBackground);
+				GUI.Label(rect, largeTexture ? Container.GetLockSettings().LockedNowButUnlockedLaterIconLarge : Container.GetLockSettings().LockedNowButUnlockedLaterIcon);
 			}
 		}
 

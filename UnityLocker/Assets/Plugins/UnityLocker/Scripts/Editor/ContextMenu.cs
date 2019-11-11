@@ -181,7 +181,7 @@ namespace Alf.UnityLocker.Editor
 
 		private static bool GetIsLockValid(UnityEngine.Object obj)
 		{
-			return obj != null && !Locker.IsAssetLocked(obj) && Container.GetAssetTypeValidators().IsAssetValid(obj);
+			return obj != null && !Locker.IsAssetLockedByMe(obj) && !Locker.IsAssetLockedBySomeoneElse(obj) && !Locker.IsAssetLockedNowButUnlockedAtLaterCommit(obj) && Container.GetAssetTypeValidators().IsAssetValid(obj);
 		}
 
 		private static bool GetIsRevertLockValid(UnityEngine.Object obj)
