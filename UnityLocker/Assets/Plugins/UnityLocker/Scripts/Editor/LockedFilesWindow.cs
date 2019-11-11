@@ -54,9 +54,9 @@ namespace Alf.UnityLocker.Editor
 				{
 					RevertLock();
 				}
-				if (GUILayout.Button("Unlock"))
+				if (GUILayout.Button("Finish Lock"))
 				{
-					Unlock();
+					FinishLock();
 				}
 			}
 			GUI.enabled = true;
@@ -80,7 +80,7 @@ namespace Alf.UnityLocker.Editor
 					m_toggledAssets.Remove(asset);
 				}
 				rect.x += toggleRect.width;
-				rect.width -= toggleRect.width;
+				rect.width -= toggleRect.width - 15f;
 				GUI.enabled = false;
 				EditorGUI.ObjectField(rect, asset, typeof(Object), false);
 				GUI.enabled = true;
@@ -104,7 +104,7 @@ namespace Alf.UnityLocker.Editor
 				{
 					var rect = EditorGUILayout.GetControlRect();
 					rect.width += 16;
-					var texture = string.IsNullOrEmpty(lockedAsset.UnlockSha) ? Container.GetLockSettings().LockIcon : Container.GetLockSettings().LockedNowButUnlockedLaterIcon;
+					var texture = lockedAsset.Locked ? Container.GetLockSettings().LockIcon : Container.GetLockSettings().LockedNowButUnlockedLaterIcon;
 					var originalY = rect.y;
 					rect.y += (rect.height / 2 - texture.height / 2) / 2;
 					GUI.Label(rect, texture);
@@ -132,11 +132,11 @@ namespace Alf.UnityLocker.Editor
 			});
 		}
 
-		private void Unlock()
+		private void FinishLock()
 		{
-			Locker.TryUnlockAssets(m_toggledAssets.ToArray(), null, (errorMessage) =>
+			Locker.TryFinishLockingAssets(m_toggledAssets.ToArray(), null, (errorMessage) =>
 			{
-				EditorUtility.DisplayDialog("Asset unlocking failed", "Asset unlocking failed\n" + errorMessage, "OK");
+				EditorUtility.DisplayDialog("Asset finishing failed", "Asset finishing failed\n" + errorMessage, "OK");
 			});
 		}
 	}

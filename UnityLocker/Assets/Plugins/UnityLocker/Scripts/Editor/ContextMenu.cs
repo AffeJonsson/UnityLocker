@@ -10,7 +10,7 @@ namespace Alf.UnityLocker.Editor
 	{
 		private const string LockMenuName = "Assets/Lock";
 		private const string RevertMenuName = "Assets/Revert Lock";
-		private const string UnlockMenuName = "Assets/Unlock";
+		private const string FinishLockMenuName = "Assets/Finish Lock";
 		private const string OpenSettingsFileMenuName = "Tools/Open Locker Settings File";
 		private const int Priority = 600;
 
@@ -144,15 +144,15 @@ namespace Alf.UnityLocker.Editor
 			return true;
 		}
 
-		[MenuItem(UnlockMenuName, priority = Priority + 2)]
-		public static void Unlock()
+		[MenuItem(FinishLockMenuName, priority = Priority + 2)]
+		public static void FinishLock()
 		{
 			var filtered = Selection.objects.Where(s => AssetDatabase.Contains(s)).ToArray();
-			TryUnlockAssets(filtered);
+			TryFinishLockingAssets(filtered);
 		}
 
-		[MenuItem(UnlockMenuName, true)]
-		public static bool ValidateUnlock()
+		[MenuItem(FinishLockMenuName, true)]
+		public static bool ValidateFinishLock()
 		{
 			if (Selection.objects == null || Selection.objects.Length == 0)
 			{
@@ -165,7 +165,7 @@ namespace Alf.UnityLocker.Editor
 			}
 			foreach (var o in filtered)
 			{
-				if (!GetIsUnlockValid(o))
+				if (!GetIsFinishLockValid(o))
 				{
 					return false;
 				}
@@ -189,7 +189,7 @@ namespace Alf.UnityLocker.Editor
 			return obj != null && Locker.IsAssetLockedByMe(obj);
 		}
 
-		private static bool GetIsUnlockValid(UnityEngine.Object obj)
+		private static bool GetIsFinishLockValid(UnityEngine.Object obj)
 		{
 			return obj != null && Locker.IsAssetLockedByMe(obj);
 		}
@@ -204,7 +204,7 @@ namespace Alf.UnityLocker.Editor
 			menu.AddSeparator("");
 			AddSingleMenuItem(menu, sceneAsset, GetIsLockValid, new UnityEngine.GUIContent("Lock"), () => TryLockAssets(new UnityEngine.Object[] { sceneAsset }));
 			AddSingleMenuItem(menu, sceneAsset, GetIsRevertLockValid, new UnityEngine.GUIContent("Revert Lock"), () => TryRevertAssets(new UnityEngine.Object[] { sceneAsset }));
-			AddSingleMenuItem(menu, sceneAsset, GetIsUnlockValid, new UnityEngine.GUIContent("Unlock"), () => TryUnlockAssets(new UnityEngine.Object[] { sceneAsset }));
+			AddSingleMenuItem(menu, sceneAsset, GetIsFinishLockValid, new UnityEngine.GUIContent("Finish Lock"), () => TryFinishLockingAssets(new UnityEngine.Object[] { sceneAsset }));
 		}
 
 		private static void AddSingleMenuItem(GenericMenu menu, SceneAsset sceneAsset, Func<UnityEngine.Object, bool> validationMethod, UnityEngine.GUIContent guiContent, GenericMenu.MenuFunction onClick)
@@ -235,11 +235,11 @@ namespace Alf.UnityLocker.Editor
 			});
 		}
 
-		private static void TryUnlockAssets(UnityEngine.Object[] assets)
+		private static void TryFinishLockingAssets(UnityEngine.Object[] assets)
 		{
-			Locker.TryUnlockAssets(assets, null, (errorMessage) =>
+			Locker.TryFinishLockingAssets(assets, null, (errorMessage) =>
 			{
-				EditorUtility.DisplayDialog("Asset unlocking failed", "Asset unlocking failed\n" + errorMessage, "OK");
+				EditorUtility.DisplayDialog("Asset finishing failed", "Asset finishing failed\n" + errorMessage, "OK");
 			});
 		}
 	}

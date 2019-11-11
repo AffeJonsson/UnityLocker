@@ -5,27 +5,30 @@ namespace Alf.UnityLocker
 	public sealed class LockSettings : ScriptableObject
 	{
 		[SerializeField]
-		private Texture2D m_lockIcon;
+		private Texture2D m_lockIcon = null;
 		[SerializeField]
-		private Texture2D m_lockedByMeIcon;
+		private Texture2D m_lockedByMeIcon = null;
 		[SerializeField]
-		private Texture2D m_lockedNowButUnlockedLaterIcon;
+		private Texture2D m_lockedNowButUnlockedLaterIcon = null;
 		[SerializeField]
-		private Texture2D m_lockIconLarge;
+		private Texture2D m_lockIconLarge = null;
 		[SerializeField]
-		private Texture2D m_lockedByMeIconLarge;
+		private Texture2D m_lockedByMeIconLarge = null;
 		[SerializeField]
-		private Texture2D m_lockedNowButUnlockedLaterIconLarge;
+		private Texture2D m_lockedNowButUnlockedLaterIconLarge = null;
 		[SerializeField]
-		private string m_baseUrl;
+		private string m_baseUrl = null;
 		[SerializeField]
-		private string m_versionControlName;
+		private string m_versionControlName = null;
 		[SerializeField]
-		private string m_baseFolderAdditionalPath;
+		private string m_baseFolderAdditionalPath = null;
 		[SerializeField]
-		private int m_parentFolderCount;
+#pragma warning disable CS0414
+		// This field is used in LockSettingsEditor
+		private int m_parentFolderCount = 0;
+#pragma warning restore CS0414
 		[SerializeField]
-		private int m_assetTypeValidators;
+		private int m_assetTypeValidators = 0;
 
 		public string GetLockedAssetsUrl
 		{
@@ -42,7 +45,7 @@ namespace Alf.UnityLocker
 			get { return m_baseUrl + "/unlock-assets"; }
 		}
 
-		public string UnlockAssetsUrl
+		public string FinishLockingAssetsUrl
 		{
 			get { return m_baseUrl + "/unlock-assets-at-commit"; }
 		}
@@ -94,10 +97,7 @@ namespace Alf.UnityLocker
 
 		public bool IsSetUp
 		{
-			get
-			{
-				return VersionControlName != null && m_baseUrl != null;
-			}
+			get { return VersionControlName != null && m_baseUrl != null; }
 		}
 
 		public int AssetTypeValidators

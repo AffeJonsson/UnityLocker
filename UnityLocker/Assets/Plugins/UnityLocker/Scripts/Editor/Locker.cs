@@ -148,7 +148,7 @@ namespace Alf.UnityLocker.Editor
 			}, onError);
 		}
 
-		public static void TryUnlockAssets(UnityEngine.Object[] assets, Action onUnlockComplete, Action<string> onError)
+		public static void TryFinishLockingAssets(UnityEngine.Object[] assets, Action onFinishLockingComplete, Action<string> onError)
 		{
 			FetchLockedAssets(() =>
 			{
@@ -172,7 +172,7 @@ namespace Alf.UnityLocker.Editor
 				{
 					OnLockedAssetsChanged();
 				}
-				UnlockAssetsAsync(Container.GetLockSettings().UnlockAssetsUrl, assets, onUnlockComplete, onError);
+				FinishLockingAssetsAsync(Container.GetLockSettings().FinishLockingAssetsUrl, assets, onFinishLockingComplete, onError);
 			}, onError);
 		}
 
@@ -375,7 +375,7 @@ namespace Alf.UnityLocker.Editor
 #endif
 		}
 
-		private static void UnlockAssetsAsync(string url, UnityEngine.Object[] assets, Action onComplete, Action<string> onError)
+		private static void FinishLockingAssetsAsync(string url, UnityEngine.Object[] assets, Action onComplete, Action<string> onError)
 		{
 #if UNITY_2018_4_OR_NEWER
 			var form = new WWWForm();
