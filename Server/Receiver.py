@@ -50,6 +50,7 @@ def actual_lock_assets(assets, locker):
         for lock_data in js["RawLockData"]:
             if lock_data["Guid"] == asset:
                 lock_data["Locked"] = True
+                lock_data["LockerName"] = locker
                 found = True
                 break
         if not found:
