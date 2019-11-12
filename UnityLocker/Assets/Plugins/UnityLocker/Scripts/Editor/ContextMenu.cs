@@ -37,11 +37,13 @@ namespace Alf.UnityLocker.Editor
 				var sceneHierarchy = sceneHierarchyField.GetValue(sceneHierarchyWindow);
 				var treeViewField = sm_sceneHierarchyType.GetField("m_TreeView", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
 				var createMultiSceneHeaderContextClickMethod = sm_sceneHierarchyType.GetMethod("CreateMultiSceneHeaderContextClick", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+				var createGameObjectContextClickMethod = sm_sceneHierarchyType.GetMethod("CreateMultiSceneHeaderContextClick", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
 				var isSceneHeaderInHierarchyWindowMethod = sm_sceneHierarchyType.GetMethod("IsSceneHeaderInHierarchyWindow", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
 				var treeView = treeViewField.GetValue(sceneHierarchy);
 #else
 				var treeViewField = sm_sceneHierarchyWindowType.GetField("m_TreeView", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
 				var createMultiSceneHeaderContextClickMethod = sm_sceneHierarchyWindowType.GetMethod("CreateMultiSceneHeaderContextClick", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+				var createGameObjectContextClickMethod = sm_sceneHierarchyWindowType.GetMethod("CreateGameObjectContextClick", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
 				var isSceneHeaderInHierarchyWindowMethod = sm_sceneHierarchyWindowType.GetMethod("IsSceneHeaderInHierarchyWindow", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
 				var treeView = treeViewField.GetValue(sceneHierarchyWindow);
 #endif
@@ -52,9 +54,9 @@ namespace Alf.UnityLocker.Editor
 					var scene = (UnityEngine.SceneManagement.Scene)getSceneByHandleMethod.Invoke(null, new object[] { id });
 					var clickedSceneHeader = (bool)isSceneHeaderInHierarchyWindowMethod.Invoke(null, new object[] { scene });
 
+					UnityEngine.Event.current.Use();
 					if (clickedSceneHeader)
 					{
-						UnityEngine.Event.current.Use();
 						var menu = new GenericMenu();
 
 #if UNITY_2018_3_OR_NEWER
@@ -62,7 +64,18 @@ namespace Alf.UnityLocker.Editor
 #else
 						createMultiSceneHeaderContextClickMethod.Invoke(sceneHierarchyWindow, new object[] { menu, id });
 #endif
-						OnAddMenuItem(menu, scene);
+						OnAddSceneMenuItem(menu, scene);
+						menu.ShowAsContext();
+					}
+					else
+					{
+						var menu = new GenericMenu();
+#if UNITY_2018_3_OR_NEWER
+						createGameObjectContextClickMethod.Invoke(sceneHierarchy, new object[] { menu, id });
+#else
+						createGameObjectContextClickMethod.Invoke(sceneHierarchyWindow, new object[] { menu, id });
+#endif
+						OnAddGameObjectMenuItem(menu, (UnityEngine.GameObject)EditorUtility.InstanceIDToObject(id));
 						menu.ShowAsContext();
 					}
 				};
@@ -78,7 +91,8 @@ namespace Alf.UnityLocker.Editor
 		static ContextMenu()
 		{
 #if UNITY_2019_1_OR_NEWER
-			SceneHierarchyHooks.addItemsToSceneHeaderContextMenu += ((menu, scene) => OnAddMenuItem(menu, scene));
+			SceneHierarchyHooks.addItemsToSceneHeaderContextMenu += ((menu, scene) => OnAddSceneMenuItem(menu, scene));
+			SceneHierarchyHooks.addItemsToGameObjectContextMenu += ((menu, asset) => OnAddGameObjectMenuItem(menu, asset));
 #elif UNITY_2017_1_OR_NEWER
 			//Unity 2017.1 to 2018.4 doesnt have SceneHierarchyHooks, so therefore we do some reflection magic to add lock buttons to hierarchy scene context menu.
 			//Unity 2017.1 to 2018.2 doesnt have SceneHierarchy, so we need to do different reflection magic depending on version
@@ -201,35 +215,43 @@ namespace Alf.UnityLocker.Editor
 
 		private static bool GetIsLockValid(UnityEngine.Object obj)
 		{
+			obj = PrefabUtility.GetCorrespondingObjectFromSource(obj) ?? obj;
 			return obj != null && !Locker.IsAssetLockedByMe(obj) && !Locker.IsAssetLockedBySomeoneElse(obj) && !Locker.IsAssetLockedNowButUnlockedAtLaterCommit(obj) && Container.GetAssetTypeValidators().IsAssetValid(obj);
 		}
 
 		private static bool GetIsRevertLockValid(UnityEngine.Object obj)
 		{
+			obj = PrefabUtility.GetCorrespondingObjectFromSource(obj) ?? obj;
 			return obj != null && Locker.IsAssetLockedByMe(obj);
 		}
 
 		private static bool GetIsFinishLockValid(UnityEngine.Object obj)
 		{
+			obj = PrefabUtility.GetCorrespondingObjectFromSource(obj) ?? obj;
 			return obj != null && Locker.IsAssetLockedByMe(obj);
 		}
 
-		private static void OnAddMenuItem(GenericMenu menu, UnityEngine.SceneManagement.Scene scene)
+		private static void OnAddSceneMenuItem(GenericMenu menu, UnityEngine.SceneManagement.Scene scene)
 		{
 			AddLockItems(menu, AssetDatabase.LoadAssetAtPath<SceneAsset>(scene.path));
 		}
 
-		private static void AddLockItems(GenericMenu menu, SceneAsset sceneAsset)
+		private static void OnAddGameObjectMenuItem(GenericMenu menu, UnityEngine.GameObject gameObject)
 		{
-			menu.AddSeparator("");
-			AddSingleMenuItem(menu, sceneAsset, GetIsLockValid, new UnityEngine.GUIContent("Lock"), () => TryLockAssets(new UnityEngine.Object[] { sceneAsset }));
-			AddSingleMenuItem(menu, sceneAsset, GetIsRevertLockValid, new UnityEngine.GUIContent("Revert Lock"), () => TryRevertAssets(new UnityEngine.Object[] { sceneAsset }));
-			AddSingleMenuItem(menu, sceneAsset, GetIsFinishLockValid, new UnityEngine.GUIContent("Finish Lock"), () => TryFinishLockingAssets(new UnityEngine.Object[] { sceneAsset }));
+			AddLockItems(menu, gameObject);
 		}
 
-		private static void AddSingleMenuItem(GenericMenu menu, SceneAsset sceneAsset, Func<UnityEngine.Object, bool> validationMethod, UnityEngine.GUIContent guiContent, GenericMenu.MenuFunction onClick)
+		private static void AddLockItems(GenericMenu menu, UnityEngine.Object asset)
 		{
-			if (validationMethod(sceneAsset))
+			menu.AddSeparator("");
+			AddSingleMenuItem(menu, asset, GetIsLockValid, new UnityEngine.GUIContent("Lock"), () => TryLockAssets(new UnityEngine.Object[] { asset }));
+			AddSingleMenuItem(menu, asset, GetIsRevertLockValid, new UnityEngine.GUIContent("Revert Lock"), () => TryRevertAssets(new UnityEngine.Object[] { asset }));
+			AddSingleMenuItem(menu, asset, GetIsFinishLockValid, new UnityEngine.GUIContent("Finish Lock"), () => TryFinishLockingAssets(new UnityEngine.Object[] { asset }));
+		}
+
+		private static void AddSingleMenuItem(GenericMenu menu, UnityEngine.Object asset, Func<UnityEngine.Object, bool> validationMethod, UnityEngine.GUIContent guiContent, GenericMenu.MenuFunction onClick)
+		{
+			if (validationMethod(asset))
 			{
 				menu.AddItem(guiContent, false, onClick);
 			}
