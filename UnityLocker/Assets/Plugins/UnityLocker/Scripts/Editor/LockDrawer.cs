@@ -90,7 +90,11 @@ namespace Alf.UnityLocker.Editor
 			{
 				return;
 			}
-			selectionRect.width += selectionRect.x;
+			var extra = selectionRect.x;
+			selectionRect.width += extra;
+#if UNITY_2018_3_OR_NEWER
+			selectionRect.width += extra;
+#endif
 			selectionRect.x = 0;
 			var asset = EditorUtility.InstanceIDToObject(instanceId);
 
@@ -184,7 +188,7 @@ namespace Alf.UnityLocker.Editor
 
 		private static void DrawBackground(Rect rect, Color color, float alpha)
 		{
-			color.a = EditorGUIUtility.isProSkin ? alpha : alpha * 2f;
+			color.a = EditorGUIUtility.isProSkin ? alpha : alpha * 4f;
 			EditorGUI.DrawRect(rect, color);
 		}
 	}
