@@ -90,7 +90,9 @@ namespace Alf.UnityLocker.Editor
 			{
 				return;
 			}
-			var asset = EditorUtility.InstanceIDToObject(instanceId) as GameObject;
+			selectionRect.width += selectionRect.x;
+			selectionRect.x = 0;
+			var asset = EditorUtility.InstanceIDToObject(instanceId);
 
 			if (asset == null)
 			{
@@ -104,12 +106,13 @@ namespace Alf.UnityLocker.Editor
 				if (sm_currentStage != null && asset == sm_currentStage.prefabContentsRoot)
 				{
 					var prefab = AssetDatabase.LoadAssetAtPath<Object>(sm_currentStage.prefabAssetPath);
-					TryDrawLock(selectionRect, prefab, false, true);
+					TryDrawLock(selectionRect, prefab, DrawType.Background);
 				}
 				else
 #endif
 				{
-					TryDrawLock(selectionRect, asset, DrawType.Background);
+					var corr = PrefabUtility.GetCorrespondingObjectFromSource(asset);
+					TryDrawLock(selectionRect, corr ?? asset, DrawType.Background);
 				}
 			}
 		}
@@ -182,13 +185,6 @@ namespace Alf.UnityLocker.Editor
 		private static void DrawBackground(Rect rect, Color color, float alpha)
 		{
 			color.a = EditorGUIUtility.isProSkin ? alpha : alpha * 2f;
-
-			const float marginX = 16f;
-			const float marginY = 1f;
-			rect.x -= marginX;
-			rect.y += marginY;
-			rect.width += marginX * 2f;
-
 			EditorGUI.DrawRect(rect, color);
 		}
 	}
