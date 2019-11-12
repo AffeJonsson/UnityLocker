@@ -58,6 +58,10 @@ namespace Alf.UnityLocker.Editor
 #if UNITY_2018_2_OR_NEWER
 		private static void OnFinishedHeaderGUI(UnityEditor.Editor editor)
 		{
+			if (!Container.GetLockSettings().IsEnabled)
+			{
+				return;
+			}
 			if (!Locker.HasFetched)
 			{
 				return;
@@ -86,6 +90,10 @@ namespace Alf.UnityLocker.Editor
 
 		private static void OnHierarchyWindowItemOnGUI(int instanceId, Rect selectionRect)
 		{
+			if (!Container.GetLockSettings().IsEnabled)
+			{
+				return;
+			}
 			if (!Locker.HasFetched)
 			{
 				return;
@@ -123,6 +131,10 @@ namespace Alf.UnityLocker.Editor
 
 		private static void OnProjectWindowItemGUI(string guid, Rect selectionRect)
 		{
+			if (!Container.GetLockSettings().IsEnabled)
+			{
+				return;
+			}
 			if (!Locker.HasFetched)
 			{
 				return;

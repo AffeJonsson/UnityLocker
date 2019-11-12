@@ -37,6 +37,10 @@ namespace Alf.UnityLocker.Editor
 
 		private static void Update()
 		{
+			if (!Container.GetLockSettings().IsEnabled)
+			{
+				return;
+			}
 			if (Time.realtimeSinceStartup >= sm_nextFetchTime)
 			{
 				FetchLockedAssets(null, null);

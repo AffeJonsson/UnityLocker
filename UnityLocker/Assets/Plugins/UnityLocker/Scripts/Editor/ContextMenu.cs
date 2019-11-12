@@ -155,6 +155,10 @@ namespace Alf.UnityLocker.Editor
 		[MenuItem(LockMenuName, true)]
 		public static bool ValidateLock()
 		{
+			if (!Container.GetLockSettings().IsEnabled)
+			{
+				return false;
+			}
 			if (Selection.objects == null || Selection.objects.Length == 0)
 			{
 				return false;
@@ -200,6 +204,10 @@ namespace Alf.UnityLocker.Editor
 		[MenuItem(RevertMenuName, true)]
 		public static bool ValidateRevertLock()
 		{
+			if (!Container.GetLockSettings().IsEnabled)
+			{
+				return false;
+			}
 			if (Selection.objects == null || Selection.objects.Length == 0)
 			{
 				return false;
@@ -245,6 +253,10 @@ namespace Alf.UnityLocker.Editor
 		[MenuItem(FinishLockMenuName, true)]
 		public static bool ValidateFinishLock()
 		{
+			if (!Container.GetLockSettings().IsEnabled)
+			{
+				return false;
+			}
 			if (Selection.objects == null || Selection.objects.Length == 0)
 			{
 				return false;
@@ -280,6 +292,10 @@ namespace Alf.UnityLocker.Editor
 
 		private static bool GetIsLockValid(UnityEngine.Object obj)
 		{
+			if (!Container.GetLockSettings().IsEnabled)
+			{
+				return false;
+			}
 #if UNITY_2018_3_OR_NEWER
 			// Only allow locking the nearest prefab, and not just child objects
 			if (PrefabUtility.GetNearestPrefabInstanceRoot(obj) != obj)
@@ -293,6 +309,10 @@ namespace Alf.UnityLocker.Editor
 
 		private static bool GetIsRevertLockValid(UnityEngine.Object obj)
 		{
+			if (!Container.GetLockSettings().IsEnabled)
+			{
+				return false;
+			}
 #if UNITY_2018_3_OR_NEWER
 			// Only allow locking the nearest prefab, and not just child objects
 			if (PrefabUtility.GetNearestPrefabInstanceRoot(obj) != obj)
@@ -306,6 +326,10 @@ namespace Alf.UnityLocker.Editor
 
 		private static bool GetIsFinishLockValid(UnityEngine.Object obj)
 		{
+			if (!Container.GetLockSettings().IsEnabled)
+			{
+				return false;
+			}
 #if UNITY_2018_3_OR_NEWER
 			// Only allow locking the nearest prefab, and not just child objects
 			if (PrefabUtility.GetNearestPrefabInstanceRoot(obj) != obj)
