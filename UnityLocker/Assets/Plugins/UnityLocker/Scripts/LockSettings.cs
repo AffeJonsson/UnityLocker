@@ -29,6 +29,8 @@ namespace Alf.UnityLocker
 #pragma warning restore CS0414
 		[SerializeField]
 		private int m_assetTypeValidators = 0;
+		[SerializeField]
+		private bool m_isEnabled = true;
 
 		public string GetLockedAssetsUrl
 		{
@@ -52,7 +54,11 @@ namespace Alf.UnityLocker
 
 		public string Username
 		{
-			get { return System.Environment.UserName; }
+#if UNITY_EDITOR
+			get { return UnityEditor.EditorPrefs.GetString("LockerName", System.Environment.UserName); }
+#else
+			get { return string.Empty; }
+#endif
 		}
 
 		public Texture2D LockIcon
@@ -103,6 +109,11 @@ namespace Alf.UnityLocker
 		public int AssetTypeValidators
 		{
 			get { return m_assetTypeValidators; }
+		}
+
+		public bool IsEnabled
+		{
+			get { return m_isEnabled; }
 		}
 	}
 }

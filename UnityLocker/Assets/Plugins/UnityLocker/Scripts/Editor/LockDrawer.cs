@@ -73,10 +73,10 @@ namespace Alf.UnityLocker.Editor
 					var isUnlockedAtLaterCommit = Locker.IsAssetLockedNowButUnlockedAtLaterCommit(Selection.activeObject);
 					if (isUnlockedAtLaterCommit)
 					{
-						var sha = Locker.GetAssetUnlockCommitSha(Selection.activeObject);
+						var sha = Locker.GetAssetUnlockCommitShaShort(Selection.activeObject);
 						if (!string.IsNullOrEmpty(sha))
 						{
-							EditorGUILayout.LabelField("(Unlocked at commit " + sha.Substring(0, 8) + ")");
+							EditorGUILayout.LabelField("(Unlocked at commit " + sha + ")");
 						}
 					}
 				}

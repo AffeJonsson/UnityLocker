@@ -8,6 +8,10 @@ namespace Alf.UnityLocker.Editor
 	{
 		private static string[] OnWillSaveAssets(string[] paths)
 		{
+			if (!Container.GetLockSettings().IsEnabled)
+			{
+				return paths;
+			}
 			if (!Locker.HasFetched)
 			{
 				for (var i = 0; i < paths.Length; i++)
@@ -27,9 +31,17 @@ namespace Alf.UnityLocker.Editor
 			for (var i = 0; i < paths.Length; i++)
 			{
 				var asset = AssetDatabase.LoadAssetAtPath<UnityEngine.Object>(paths[i]);
-				if (asset != null && Locker.IsAssetLockedBySomeoneElse(asset))
+				var isAssetLockedNowButUnlockedAtLaterCommit = Locker.IsAssetLockedNowButUnlockedAtLaterCommit(asset);
+				if (asset != null && (Locker.IsAssetLockedBySomeoneElse(asset) || isAssetLockedNowButUnlockedAtLaterCommit))
 				{
-					pathsLocked += paths[i] + " (" + Locker.GetAssetLocker(asset) + ")\n";
+					if (isAssetLockedNowButUnlockedAtLaterCommit)
+					{
+						pathsLocked += paths[i] + " (Locked by " + Locker.GetAssetLocker(asset) + ", unlocks at commit " + Locker.GetAssetUnlockCommitShaShort(asset) + ")\n";
+					}
+					else
+					{
+						pathsLocked += paths[i] + " (Locked by " + Locker.GetAssetLocker(asset) + ")\n";
+					}
 					indexesLocked.Add(i);
 				}
 			}

@@ -23,7 +23,7 @@ namespace Alf.UnityLocker.Editor
 			}
 			sm_versionControllers = new List<string>(4);
 			var assetValidators = new Dictionary<string, int>();
-			
+
 			var assemblies = AppDomain.CurrentDomain.GetAssemblies();
 			for (var i = 0; i < assemblies.Length; i++)
 			{
@@ -42,77 +42,89 @@ namespace Alf.UnityLocker.Editor
 					}
 				}
 			}
-			
+
 			sm_assetTypeValidatorNames = assetValidators.Keys.OrderBy(n => assetValidators[n]).ToList();
 		}
 
 		public override void OnInspectorGUI()
 		{
 			serializedObject.Update();
-			EditorGUILayout.PropertyField(serializedObject.FindProperty("m_lockIcon"));
-			EditorGUILayout.PropertyField(serializedObject.FindProperty("m_lockedByMeIcon"));
-			EditorGUILayout.PropertyField(serializedObject.FindProperty("m_lockedNowButUnlockedLaterIcon"));
-			EditorGUILayout.PropertyField(serializedObject.FindProperty("m_lockIconLarge"));
-			EditorGUILayout.PropertyField(serializedObject.FindProperty("m_lockedByMeIconLarge"));
-			EditorGUILayout.PropertyField(serializedObject.FindProperty("m_lockedNowButUnlockedLaterIconLarge"));
-			EditorGUILayout.PropertyField(serializedObject.FindProperty("m_baseUrl"));
-
-			if (!string.IsNullOrEmpty(serializedObject.FindProperty("m_versionControlName").stringValue))
+			var isEnabledProperty = serializedObject.FindProperty("m_isEnabled");
+			EditorGUILayout.PropertyField(isEnabledProperty);
+			using (var disabledScope = new EditorGUI.DisabledGroupScope(!isEnabledProperty.boolValue))
 			{
 				using (var scope = new EditorGUI.ChangeCheckScope())
 				{
-					var parentCountProperty = serializedObject.FindProperty("m_parentFolderCount");
-					EditorGUILayout.DelayedIntField(parentCountProperty);
+					var name = EditorGUILayout.DelayedTextField("Name", EditorPrefs.GetString("LockerName", Environment.UserName));
 					if (scope.changed)
 					{
-						if (parentCountProperty.intValue < 0)
-						{
-							parentCountProperty.intValue = 0;
-						}
-						var baseFolder = string.Empty;
-						for (var i = 0; i < parentCountProperty.intValue; i++)
-						{
-							baseFolder += @"..\";
-						}
-						serializedObject.FindProperty("m_baseFolderAdditionalPath").stringValue = baseFolder;
+						EditorPrefs.SetString("LockerName", name);
 					}
 				}
-				EditorGUILayout.LabelField("Repo folder: " + (target as LockSettings).RepoPath, EditorStyles.miniLabel);
-			}
+				EditorGUILayout.PropertyField(serializedObject.FindProperty("m_lockIcon"));
+				EditorGUILayout.PropertyField(serializedObject.FindProperty("m_lockedByMeIcon"));
+				EditorGUILayout.PropertyField(serializedObject.FindProperty("m_lockedNowButUnlockedLaterIcon"));
+				EditorGUILayout.PropertyField(serializedObject.FindProperty("m_lockIconLarge"));
+				EditorGUILayout.PropertyField(serializedObject.FindProperty("m_lockedByMeIconLarge"));
+				EditorGUILayout.PropertyField(serializedObject.FindProperty("m_lockedNowButUnlockedLaterIconLarge"));
+				EditorGUILayout.PropertyField(serializedObject.FindProperty("m_baseUrl"));
 
-			if (sm_versionControllers == null || sm_versionControllers.Count == 0)
-			{
-				GUI.enabled = false;
-				EditorGUILayout.Popup("Version Control", 0, new string[0]);
-				GUI.enabled = true;
-			}
-			else
-			{
-				var property = serializedObject.FindProperty("m_versionControlName");
-				var currentIndex = sm_versionControllers.IndexOf(property.stringValue);
-				using (var changeCheck = new EditorGUI.ChangeCheckScope())
+				if (!string.IsNullOrEmpty(serializedObject.FindProperty("m_versionControlName").stringValue))
 				{
-					var newIndex = EditorGUILayout.Popup("Version Control", currentIndex, sm_versionControllers.ToArray());
-					if (changeCheck.changed)
+					using (var scope = new EditorGUI.ChangeCheckScope())
 					{
-						property.stringValue = sm_versionControllers[newIndex];
+						var parentCountProperty = serializedObject.FindProperty("m_parentFolderCount");
+						EditorGUILayout.DelayedIntField(parentCountProperty);
+						if (scope.changed)
+						{
+							if (parentCountProperty.intValue < 0)
+							{
+								parentCountProperty.intValue = 0;
+							}
+							var baseFolder = string.Empty;
+							for (var i = 0; i < parentCountProperty.intValue; i++)
+							{
+								baseFolder += @"..\";
+							}
+							serializedObject.FindProperty("m_baseFolderAdditionalPath").stringValue = baseFolder;
+						}
+					}
+					EditorGUILayout.LabelField("Repo folder: " + (target as LockSettings).RepoPath, EditorStyles.miniLabel);
+				}
+
+				if (sm_versionControllers == null || sm_versionControllers.Count == 0)
+				{
+					GUI.enabled = false;
+					EditorGUILayout.Popup("Version Control", 0, new string[0]);
+					GUI.enabled = true;
+				}
+				else
+				{
+					var property = serializedObject.FindProperty("m_versionControlName");
+					var currentIndex = sm_versionControllers.IndexOf(property.stringValue);
+					using (var changeCheck = new EditorGUI.ChangeCheckScope())
+					{
+						var newIndex = EditorGUILayout.Popup("Version Control", currentIndex, sm_versionControllers.ToArray());
+						if (changeCheck.changed)
+						{
+							property.stringValue = sm_versionControllers[newIndex];
+						}
 					}
 				}
-			}
 
-			if (sm_assetTypeValidatorNames == null || sm_assetTypeValidatorNames.Count == 0)
-			{
-				GUI.enabled = false;
-				EditorGUILayout.Popup("Valid Asset Types", 0, new string[0]);
-				GUI.enabled = true;
+				if (sm_assetTypeValidatorNames == null || sm_assetTypeValidatorNames.Count == 0)
+				{
+					GUI.enabled = false;
+					EditorGUILayout.Popup("Valid Asset Types", 0, new string[0]);
+					GUI.enabled = true;
+				}
+				else
+				{
+					var property = serializedObject.FindProperty("m_assetTypeValidators");
+					var rect = EditorGUILayout.GetControlRect();
+					property.intValue = EditorGUI.MaskField(rect, "Valid Asset Types", property.intValue, sm_assetTypeValidatorNames.ToArray());
+				}
 			}
-			else
-			{
-				var property = serializedObject.FindProperty("m_assetTypeValidators");
-				var rect = EditorGUILayout.GetControlRect();
-				property.intValue = EditorGUI.MaskField(rect, "Valid Asset Types", property.intValue, sm_assetTypeValidatorNames.ToArray());
-			}
-			
 
 			serializedObject.ApplyModifiedProperties();
 		}

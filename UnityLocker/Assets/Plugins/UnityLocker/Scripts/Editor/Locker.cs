@@ -20,6 +20,7 @@ namespace Alf.UnityLocker.Editor
 		private static float sm_nextFetchTime;
 
 		private const float TimeBetweenFetches = 10f;
+		private const int MaxShortShaLength = 8;
 
 		public static event Action OnLockedAssetsChanged;
 
@@ -277,6 +278,20 @@ namespace Alf.UnityLocker.Editor
 			if (sm_lockedAssets.TryGetValue(asset, out lockData))
 			{
 				return lockData.UnlockSha ?? string.Empty;
+			}
+			return string.Empty;
+		}
+
+		public static string GetAssetUnlockCommitShaShort(UnityEngine.Object asset)
+		{
+			LockedAssetsData.AssetLockData lockData;
+			if (sm_lockedAssets.TryGetValue(asset, out lockData))
+			{
+				if (string.IsNullOrEmpty(lockData.UnlockSha))
+				{
+					return string.Empty;
+				}
+				return lockData.UnlockSha.Substring(0, Mathf.Min(MaxShortShaLength, lockData.UnlockSha.Length));
 			}
 			return string.Empty;
 		}
