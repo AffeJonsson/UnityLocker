@@ -15,6 +15,12 @@ namespace Alf.UnityLocker.Editor
 		private static List<string> sm_versionControllers;
 		private static List<string> sm_assetTypeValidatorNames;
 
+		[MenuItem("Tools/Open Locker Settings File", priority = 10000)]
+		public static void OpenSettingsFile()
+		{
+			Selection.activeObject = Container.GetLockSettings();
+		}
+
 		private void OnEnable()
 		{
 			if (sm_versionControllers != null && sm_assetTypeValidatorNames != null)

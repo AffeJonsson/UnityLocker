@@ -2,7 +2,6 @@
 using System;
 using System.Collections.Generic;
 using UnityEditor;
-using UnityEngine;
 using UnityEngine.Networking;
 
 namespace Alf.UnityLocker.Editor

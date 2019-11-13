@@ -1,20 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using UnityEditor;
+using UnityEngine;
 
-namespace Alf.UnityLocker.Editor
+namespace Alf.UnityLocker.Editor.ContextMenus
 {
 	[InitializeOnLoad]
-	public static class ContextMenu
+	public static class SceneHierarchyContextMenu
 	{
-		private const string LockMenuName = "Assets/Lock";
-		private const string RevertMenuName = "Assets/Revert Lock";
-		private const string FinishLockMenuName = "Assets/Finish Lock";
-		private const string OpenSettingsFileMenuName = "Tools/Open Locker Settings File";
-		private const int Priority = 600;
-
-#if !UNITY_2019_1_OR_NEWER
 #if UNITY_2018_3_OR_NEWER
 		private static Type sm_sceneHierarchyType = null;
 #endif
@@ -54,7 +46,7 @@ namespace Alf.UnityLocker.Editor
 					var scene = (UnityEngine.SceneManagement.Scene)getSceneByHandleMethod.Invoke(null, new object[] { id });
 					var clickedSceneHeader = (bool)isSceneHeaderInHierarchyWindowMethod.Invoke(null, new object[] { scene });
 
-					UnityEngine.Event.current.Use();
+					Event.current.Use();
 					if (clickedSceneHeader)
 					{
 						var menu = new GenericMenu();
@@ -88,7 +80,6 @@ namespace Alf.UnityLocker.Editor
 			}
 			EditorApplication.update -= ContinusTryCreateMenu;
 		}
-#endif
 #if UNITY_2018_3_OR_NEWER
 		private static void OnPrefabStageOpened(UnityEditor.Experimental.SceneManagement.PrefabStage stage)
 		{
@@ -101,12 +92,8 @@ namespace Alf.UnityLocker.Editor
 		}
 #endif
 
-		static ContextMenu()
+		static SceneHierarchyContextMenu()
 		{
-#if UNITY_2019_1_OR_NEWER
-			SceneHierarchyHooks.addItemsToSceneHeaderContextMenu += ((menu, scene) => OnAddSceneMenuItem(menu, scene));
-			SceneHierarchyHooks.addItemsToGameObjectContextMenu += ((menu, asset) => OnAddGameObjectMenuItem(menu, asset));
-#elif UNITY_2017_1_OR_NEWER
 #if UNITY_2018_3_OR_NEWER
 			UnityEditor.Experimental.SceneManagement.PrefabStage.prefabStageOpened += OnPrefabStageOpened;
 			UnityEditor.Experimental.SceneManagement.PrefabStage.prefabStageClosing += OnPrefabStageClosing;
@@ -134,219 +121,14 @@ namespace Alf.UnityLocker.Editor
 			{
 				EditorApplication.update += ContinusTryCreateMenu;
 			}, context);
-#endif
 		}
 
-		[MenuItem(LockMenuName, priority = Priority)]
-		public static void Lock()
-		{
-			var filtered = Selection.objects.Where(s =>
-			{
-				if (s == null)
-				{
-					return false;
-				}
-				var corr = PrefabUtility.GetCorrespondingObjectFromSource(s);
-				return AssetDatabase.Contains(corr ?? s);
-			}).ToArray();
-			TryLockAssets(filtered);
-		}
-
-		[MenuItem(LockMenuName, true)]
-		public static bool ValidateLock()
-		{
-			if (!Container.GetLockSettings().IsEnabled)
-			{
-				return false;
-			}
-			if (Selection.objects == null || Selection.objects.Length == 0)
-			{
-				return false;
-			}
-			var filtered = Selection.objects.Where(s =>
-			{
-				if (s == null)
-				{
-					return false;
-				}
-				var corr = PrefabUtility.GetCorrespondingObjectFromSource(s);
-				return AssetDatabase.Contains(corr ?? s);
-			});
-			if (filtered.Count() == 0)
-			{
-				return false;
-			}
-			foreach (var o in filtered)
-			{
-				if (!GetIsLockValid(o))
-				{
-					return false;
-				}
-			}
-			return true;
-		}
-
-		[MenuItem(RevertMenuName, priority = Priority + 1)]
-		public static void RevertLock()
-		{
-			var filtered = Selection.objects.Where(s =>
-			{
-				if (s == null)
-				{
-					return false;
-				}
-				var corr = PrefabUtility.GetCorrespondingObjectFromSource(s);
-				return AssetDatabase.Contains(corr ?? s);
-			}).ToArray();
-			TryRevertAssets(filtered);
-		}
-
-		[MenuItem(RevertMenuName, true)]
-		public static bool ValidateRevertLock()
-		{
-			if (!Container.GetLockSettings().IsEnabled)
-			{
-				return false;
-			}
-			if (Selection.objects == null || Selection.objects.Length == 0)
-			{
-				return false;
-			}
-			var filtered = Selection.objects.Where(s =>
-			{
-				if (s == null)
-				{
-					return false;
-				}
-				var corr = PrefabUtility.GetCorrespondingObjectFromSource(s);
-				return AssetDatabase.Contains(corr ?? s);
-			});
-			if (filtered.Count() == 0)
-			{
-				return false;
-			}
-			foreach (var o in filtered)
-			{
-				if (!GetIsRevertLockValid(o))
-				{
-					return false;
-				}
-			}
-			return true;
-		}
-
-		[MenuItem(FinishLockMenuName, priority = Priority + 2)]
-		public static void FinishLock()
-		{
-			var filtered = Selection.objects.Where(s =>
-			{
-				if (s == null)
-				{
-					return false;
-				}
-				var corr = PrefabUtility.GetCorrespondingObjectFromSource(s);
-				return AssetDatabase.Contains(corr ?? s);
-			}).ToArray();
-			TryFinishLockingAssets(filtered);
-		}
-
-		[MenuItem(FinishLockMenuName, true)]
-		public static bool ValidateFinishLock()
-		{
-			if (!Container.GetLockSettings().IsEnabled)
-			{
-				return false;
-			}
-			if (Selection.objects == null || Selection.objects.Length == 0)
-			{
-				return false;
-			}
-			var filtered = Selection.objects.Where(s =>
-			{
-				if (s == null)
-				{
-					return false;
-				}
-				var corr = PrefabUtility.GetCorrespondingObjectFromSource(s);
-				return AssetDatabase.Contains(corr ?? s);
-			});
-			if (filtered.Count() == 0)
-			{
-				return false;
-			}
-			foreach (var o in filtered)
-			{
-				if (!GetIsFinishLockValid(o))
-				{
-					return false;
-				}
-			}
-			return true;
-		}
-
-		[MenuItem(OpenSettingsFileMenuName, priority = 10000)]
-		public static void OpenSettingsFile()
-		{
-			Selection.activeObject = Container.GetLockSettings();
-		}
-
-		private static bool GetIsLockValid(UnityEngine.Object obj)
-		{
-			if (!Container.GetLockSettings().IsEnabled)
-			{
-				return false;
-			}
-#if UNITY_2018_3_OR_NEWER
-			// Only allow locking the nearest prefab, and not just child objects
-			if (PrefabUtility.GetNearestPrefabInstanceRoot(obj) != obj)
-			{
-				return false;
-			}
-#endif
-			obj = PrefabUtility.GetCorrespondingObjectFromSource(obj) ?? obj;
-			return obj != null && !Locker.IsAssetLockedByMe(obj) && !Locker.IsAssetLockedBySomeoneElse(obj) && !Locker.IsAssetLockedNowButUnlockedAtLaterCommit(obj) && Container.GetAssetTypeValidators().IsAssetValid(obj);
-		}
-
-		private static bool GetIsRevertLockValid(UnityEngine.Object obj)
-		{
-			if (!Container.GetLockSettings().IsEnabled)
-			{
-				return false;
-			}
-#if UNITY_2018_3_OR_NEWER
-			// Only allow locking the nearest prefab, and not just child objects
-			if (PrefabUtility.GetNearestPrefabInstanceRoot(obj) != obj)
-			{
-				return false;
-			}
-#endif
-			obj = PrefabUtility.GetCorrespondingObjectFromSource(obj) ?? obj;
-			return obj != null && Locker.IsAssetLockedByMe(obj);
-		}
-
-		private static bool GetIsFinishLockValid(UnityEngine.Object obj)
-		{
-			if (!Container.GetLockSettings().IsEnabled)
-			{
-				return false;
-			}
-#if UNITY_2018_3_OR_NEWER
-			// Only allow locking the nearest prefab, and not just child objects
-			if (PrefabUtility.GetNearestPrefabInstanceRoot(obj) != obj)
-			{
-				return false;
-			}
-#endif
-			obj = PrefabUtility.GetCorrespondingObjectFromSource(obj) ?? obj;
-			return obj != null && Locker.IsAssetLockedByMe(obj);
-		}
-
-		private static void OnAddSceneMenuItem(GenericMenu menu, UnityEngine.SceneManagement.Scene scene)
+		public static void OnAddSceneMenuItem(GenericMenu menu, UnityEngine.SceneManagement.Scene scene)
 		{
 			AddLockItems(menu, AssetDatabase.LoadAssetAtPath<SceneAsset>(scene.path));
 		}
 
-		private static void OnAddGameObjectMenuItem(GenericMenu menu, UnityEngine.GameObject gameObject)
+		public static void OnAddGameObjectMenuItem(GenericMenu menu, GameObject gameObject)
 		{
 			AddLockItems(menu, gameObject);
 		}
@@ -354,12 +136,12 @@ namespace Alf.UnityLocker.Editor
 		private static void AddLockItems(GenericMenu menu, UnityEngine.Object asset)
 		{
 			menu.AddSeparator("");
-			AddSingleMenuItem(menu, asset, GetIsLockValid, new UnityEngine.GUIContent("Lock"), () => TryLockAssets(new UnityEngine.Object[] { PrefabUtility.GetCorrespondingObjectFromSource(asset) ?? asset }));
-			AddSingleMenuItem(menu, asset, GetIsRevertLockValid, new UnityEngine.GUIContent("Revert Lock"), () => TryRevertAssets(new UnityEngine.Object[] { PrefabUtility.GetCorrespondingObjectFromSource(asset) ?? asset }));
-			AddSingleMenuItem(menu, asset, GetIsFinishLockValid, new UnityEngine.GUIContent("Finish Lock"), () => TryFinishLockingAssets(new UnityEngine.Object[] { PrefabUtility.GetCorrespondingObjectFromSource(asset) ?? asset }));
+			AddSingleMenuItem(menu, asset, Locker.GetIsLockValid, new GUIContent("Lock"), () => TryLockAssets(new UnityEngine.Object[] { PrefabUtility.GetCorrespondingObjectFromSource(asset) ?? asset }));
+			AddSingleMenuItem(menu, asset, Locker.GetIsRevertLockValid, new GUIContent("Revert Lock"), () => TryRevertAssets(new UnityEngine.Object[] { PrefabUtility.GetCorrespondingObjectFromSource(asset) ?? asset }));
+			AddSingleMenuItem(menu, asset, Locker.GetIsFinishLockValid, new GUIContent("Finish Lock"), () => TryFinishLockingAssets(new UnityEngine.Object[] { PrefabUtility.GetCorrespondingObjectFromSource(asset) ?? asset }));
 		}
 
-		private static void AddSingleMenuItem(GenericMenu menu, UnityEngine.Object asset, Func<UnityEngine.Object, bool> validationMethod, UnityEngine.GUIContent guiContent, GenericMenu.MenuFunction onClick)
+		private static void AddSingleMenuItem(GenericMenu menu, UnityEngine.Object asset, Func<UnityEngine.Object, bool> validationMethod, GUIContent guiContent, GenericMenu.MenuFunction onClick)
 		{
 			if (validationMethod(asset))
 			{
