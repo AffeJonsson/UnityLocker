@@ -8,6 +8,10 @@ namespace Alf.UnityLocker.Editor.Drawers
 	public static class HeaderLockDrawer
 	{
 		private static readonly Rect sm_headerRect = new Rect(7, 7, 21, 21);
+		private static readonly GUIStyle sm_lockLabelStyle = new GUIStyle
+		{
+			alignment = TextAnchor.MiddleRight
+		};
 
 		static HeaderLockDrawer()
 		{
@@ -16,6 +20,10 @@ namespace Alf.UnityLocker.Editor.Drawers
 
 		private static void OnFinishedHeaderGUI(UnityEditor.Editor editor)
 		{
+			if (editor.GetType() == typeof(MaterialEditor))
+			{
+				return;
+			}
 			if (!Container.GetLockSettings().IsEnabled)
 			{
 				return;
@@ -24,21 +32,85 @@ namespace Alf.UnityLocker.Editor.Drawers
 			{
 				return;
 			}
-
-			if (Locker.IsAssetLockedByMe(Selection.activeObject) || Locker.IsAssetLockedBySomeoneElse(Selection.activeObject) || Locker.IsAssetLockedNowButUnlockedAtLaterCommit(Selection.activeObject))
+			if (!Locker.AreAssetTypesValid(editor.targets))
 			{
-				var locker = Locker.GetAssetLocker(Selection.activeObject);
+				return;
+			}
+
+			var isLockedByMe = Locker.AreAllAssetsLockedByMe(editor.targets);
+			var isLockedBySomeoneElse = Locker.IsAnyAssetLockedBySomeoneElse(editor.targets);
+			var isLockedNowButUnlockedAtLaterCommit = Locker.IsAnyAssetLockedNowButUnlockedAtLaterCommit(editor.targets);
+
+			using (new GUILayout.HorizontalScope())
+			{
+				EditorGUILayout.LabelField("Lock", sm_lockLabelStyle, GUILayout.Width(44));
+				using (new EditorGUI.DisabledGroupScope(isLockedByMe || isLockedBySomeoneElse || isLockedNowButUnlockedAtLaterCommit))
+				{
+					if (GUILayout.Button(new GUIContent("Lock"), EditorStyles.miniButton))
+					{
+						Locker.TryLockAssets(editor.targets, null, (errorMessage) =>
+						{
+							EditorUtility.DisplayDialog("Asset locking failed", "Asset locking failed\n" + errorMessage, "OK");
+						});
+					}
+				}
+				using (new EditorGUI.DisabledGroupScope(!isLockedByMe))
+				{
+					if(GUILayout.Button(new GUIContent("Revert Lock"), EditorStyles.miniButton))
+					{
+						Locker.TryRevertAssetLocks(editor.targets, null, (errorMessage) =>
+						{
+							EditorUtility.DisplayDialog("Asset reverting failed", "Asset reverting failed\n" + errorMessage, "OK");
+						});
+					}
+					if (GUILayout.Button(new GUIContent("Finish Lock"), EditorStyles.miniButton))
+					{
+						Locker.TryFinishLockingAssets(editor.targets, null, (errorMessage) =>
+						{
+							EditorUtility.DisplayDialog("Asset finishing failed", "Asset finishing failed\n" + errorMessage, "OK");
+						});
+					}
+				}
+			}
+
+			if (isLockedByMe || isLockedBySomeoneElse || isLockedNowButUnlockedAtLaterCommit)
+			{
+				var hasMultipleLockers = false;
+				var locker = Locker.GetAssetLocker(editor.targets[0]);
+				for (var i = 1; i < editor.targets.Length; i++)
+				{
+					if (locker != Locker.GetAssetLocker(editor.targets[1]))
+					{
+						hasMultipleLockers = true;
+						break;
+					}
+				}
 				if (!string.IsNullOrEmpty(locker))
 				{
-					LockDrawer.TryDrawLock(sm_headerRect, Selection.activeObject, LockDrawer.DrawType.LargeIcon);
-					EditorGUILayout.LabelField("Asset locked by " + locker, EditorStyles.boldLabel);
-					var isUnlockedAtLaterCommit = Locker.IsAssetLockedNowButUnlockedAtLaterCommit(Selection.activeObject);
-					if (isUnlockedAtLaterCommit)
+					LockDrawer.TryDrawLock(sm_headerRect, editor.target, LockDrawer.DrawType.LargeIcon);
+					EditorGUILayout.LabelField("Asset" + (editor.targets.Length > 1 ? "s" : "") + " locked by " + (hasMultipleLockers ? "multiple users" : locker), EditorStyles.boldLabel);
+					if (isLockedNowButUnlockedAtLaterCommit)
 					{
-						var sha = Locker.GetAssetUnlockCommitShaShort(Selection.activeObject);
+						var hasMultipleUnlockShas = false;
+						var sha = Locker.GetAssetUnlockCommitShaShort(editor.targets[0]);
+						for (var i = 1; i < editor.targets.Length; i++)
+						{
+							if (sha != Locker.GetAssetUnlockCommitShaShort(editor.targets[1]))
+							{
+								hasMultipleUnlockShas = true;
+								break;
+							}
+						}
 						if (!string.IsNullOrEmpty(sha))
 						{
-							EditorGUILayout.LabelField("(Unlocked at commit " + sha + ")");
+							if (hasMultipleUnlockShas)
+							{
+								EditorGUILayout.LabelField("(Unlocked at multiple commits)");
+							}
+							else
+							{
+								EditorGUILayout.LabelField("(Unlocked at commit " + sha + ")");
+							}
 						}
 					}
 				}

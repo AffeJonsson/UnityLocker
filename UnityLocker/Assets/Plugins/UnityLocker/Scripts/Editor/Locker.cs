@@ -99,7 +99,7 @@ namespace Alf.UnityLocker.Editor
 		{
 			FetchLockedAssets(() =>
 			{
-				assets = GetIsLockValid(assets);
+				assets = GetAssetsWhereLockIsValid(assets);
 				int lockedIndex;
 				if (IsAnyAssetLocked(assets, out lockedIndex))
 				{
@@ -129,7 +129,7 @@ namespace Alf.UnityLocker.Editor
 		{
 			FetchLockedAssets(() =>
 			{
-				assets = GetIsRevertLockValid(assets);
+				assets = GetAssetsWhereRevertLockIsValid(assets);
 				int faultyIndex;
 				if (!AreAssetsLockedByMe(assets, out faultyIndex))
 				{
@@ -159,7 +159,7 @@ namespace Alf.UnityLocker.Editor
 		{
 			FetchLockedAssets(() =>
 			{
-				assets = GetIsFinishLockValid(assets);
+				assets = GetAssetsWhereFinishLockIsValid(assets);
 				int faultyIndex;
 				if (!AreAssetsLockedByMe(assets, out faultyIndex))
 				{
@@ -269,6 +269,42 @@ namespace Alf.UnityLocker.Editor
 			return sm_assetsLockedButUnlockedLater.Contains(FilterAsset(asset));
 		}
 
+		public static bool AreAllAssetsLockedByMe(UnityEngine.Object[] assets)
+		{
+			for (var i = 0; i < assets.Length; i++)
+			{
+				if (!IsAssetLockedByMe(assets[i]))
+				{
+					return false;
+				}
+			}
+			return true;
+		}
+
+		public static bool IsAnyAssetLockedBySomeoneElse(UnityEngine.Object[] assets)
+		{
+			for (var i = 0; i < assets.Length; i++)
+			{
+				if (IsAssetLockedBySomeoneElse(assets[i]))
+				{
+					return true;
+				}
+			}
+			return false;
+		}
+
+		public static bool IsAnyAssetLockedNowButUnlockedAtLaterCommit(UnityEngine.Object[] assets)
+		{
+			for (var i = 0; i < assets.Length; i++)
+			{
+				if (IsAssetLockedNowButUnlockedAtLaterCommit(assets[i]))
+				{
+					return true;
+				}
+			}
+			return false;
+		}
+
 		public static string GetAssetLocker(UnityEngine.Object asset)
 		{
 			LockedAssetsData.AssetLockData lockData;
@@ -333,18 +369,35 @@ namespace Alf.UnityLocker.Editor
 			return asset != null && IsAssetLockedByMe(asset);
 		}
 
+		public static bool IsAssetTypeValid(UnityEngine.Object asset)
+		{
+			return Container.GetAssetTypeValidators().IsAssetValid(FilterAsset(asset));
+		}
+
+		public static bool AreAssetTypesValid(UnityEngine.Object[] assets)
+		{
+			for (var i = 0; i < assets.Length; i++)
+			{
+				if (!IsAssetTypeValid(assets[i]))
+				{
+					return false;
+				}
+			}
+			return true;
+		}
+
 		#region Private API
-		private static UnityEngine.Object[] GetIsLockValid(UnityEngine.Object[] assets)
+		private static UnityEngine.Object[] GetAssetsWhereLockIsValid(UnityEngine.Object[] assets)
 		{
 			return assets.Select(o => FilterAsset(o)).Where(o => GetIsLockValid(o)).ToArray();
 		}
 
-		private static UnityEngine.Object[] GetIsRevertLockValid(UnityEngine.Object[] assets)
+		private static UnityEngine.Object[] GetAssetsWhereRevertLockIsValid(UnityEngine.Object[] assets)
 		{
 			return assets.Select(o => FilterAsset(o)).Where(o => GetIsRevertLockValid(o)).ToArray();
 		}
 
-		private static UnityEngine.Object[] GetIsFinishLockValid(UnityEngine.Object[] assets)
+		private static UnityEngine.Object[] GetAssetsWhereFinishLockIsValid(UnityEngine.Object[] assets)
 		{
 			return assets.Select(o => FilterAsset(o)).Where(o => GetIsFinishLockValid(o)).ToArray();
 		}
@@ -374,8 +427,13 @@ namespace Alf.UnityLocker.Editor
 				}
 			}
 #endif
-
-			return PrefabUtility.GetCorrespondingObjectFromSource(asset) ?? asset;
+			var importer = asset as AssetImporter;
+			if (importer != null)
+			{
+				asset = AssetDatabase.LoadAssetAtPath<UnityEngine.Object>(importer.assetPath);
+			}
+			var source = PrefabUtility.GetCorrespondingObjectFromSource(asset);
+			return source ?? asset;
 		}
 
 		private static bool IsAssetLocked(UnityEngine.Object asset)
