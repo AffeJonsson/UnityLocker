@@ -202,7 +202,11 @@ namespace Alf.UnityLocker.Editor
 					{
 						onAssetsFetched.Invoke();
 					}
-
+					
+					foreach (var editor in ActiveEditorTracker.sharedTracker.activeEditors)
+					{
+						editor.Repaint();
+					}
 					return;
 				}
 				var lockData = JsonConvert.DeserializeObject<LockedAssetsData>(data);
@@ -239,6 +243,10 @@ namespace Alf.UnityLocker.Editor
 
 				EditorApplication.RepaintHierarchyWindow();
 				EditorApplication.RepaintProjectWindow();
+				foreach (var editor in ActiveEditorTracker.sharedTracker.activeEditors)
+				{
+					editor.Repaint();
+				}
 			}, onError);
 		}
 
