@@ -6,6 +6,10 @@
 		public bool IsAssetValid(UnityEngine.Object asset)
 		{
 #if UNITY_EDITOR
+			if (asset == null)
+			{
+				return false;
+			}
 	#if UNITY_2018_3_OR_NEWER
 			return UnityEditor.PrefabUtility.GetPrefabAssetType(asset) != UnityEditor.PrefabAssetType.NotAPrefab;
 	#else

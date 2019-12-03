@@ -30,6 +30,12 @@ namespace Alf.UnityLocker.Editor
 			private set;
 		}
 
+		public static string ErrorMessage
+		{
+			get;
+			private set;
+		}
+
 		static Locker()
 		{
 			EditorApplication.update += Update;
@@ -202,7 +208,7 @@ namespace Alf.UnityLocker.Editor
 					{
 						onAssetsFetched.Invoke();
 					}
-					
+
 					foreach (var editor in ActiveEditorTracker.sharedTracker.activeEditors)
 					{
 						editor.Repaint();
@@ -488,20 +494,36 @@ namespace Alf.UnityLocker.Editor
 			var webRequest = UnityWebRequest.Get(url);
 			Container.GetWebRequestManager().WaitForWebRequest(webRequest, () =>
 			{
+				ErrorMessage = string.Empty;
 				if (onComplete != null)
 				{
 					onComplete(webRequest.downloadHandler.text);
 				}
-			}, onError);
+			}, (error) =>
+			{
+				ErrorMessage = error;
+				if (onError != null)
+				{
+					onError(error);
+				}
+			});
 #else
 			var www = new WWW(url);
 			Container.GetWWWManager().WaitForWWW(www, () =>
 			{
+				ErrorMessage = string.Empty;
 				if (onComplete != null)
 				{
 					onComplete(www.text);
 				}
-			}, onError);
+			}, (error) =>
+			{
+				ErrorMessage = error;
+				if (onError != null)
+				{
+					onError(error);
+				}
+			});
 #endif
 		}
 

@@ -12,8 +12,22 @@ namespace Alf.UnityLocker.Editor
 	[CustomEditor(typeof(LockSettings))]
 	public class LockSettingsEditor : UnityEditor.Editor
 	{
+		private static GUIStyle sm_errorStyle;
 		private static List<string> sm_versionControllers;
 		private static List<string> sm_assetTypeValidatorNames;
+
+		private static GUIStyle ErrorStyle
+		{
+			get
+			{
+				if (sm_errorStyle == null)
+				{
+					sm_errorStyle = new GUIStyle(EditorStyles.label);
+					sm_errorStyle.normal.textColor = Color.red;
+				}
+				return sm_errorStyle;
+			}
+		}
 
 		[MenuItem("Tools/Open Locker Settings File", priority = 10000)]
 		public static void OpenSettingsFile()
@@ -130,8 +144,13 @@ namespace Alf.UnityLocker.Editor
 					var rect = EditorGUILayout.GetControlRect();
 					property.intValue = EditorGUI.MaskField(rect, "Valid Asset Types", property.intValue, sm_assetTypeValidatorNames.ToArray());
 				}
-			}
 
+				if (isEnabledProperty.boolValue && !string.IsNullOrEmpty(Locker.ErrorMessage))
+				{
+
+					EditorGUILayout.LabelField(new GUIContent("Error: " + Locker.ErrorMessage), ErrorStyle);
+				}
+			}
 			serializedObject.ApplyModifiedProperties();
 		}
 	}
