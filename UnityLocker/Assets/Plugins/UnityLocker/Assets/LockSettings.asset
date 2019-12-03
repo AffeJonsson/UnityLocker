@@ -25,4 +25,5 @@ MonoBehaviour:
   m_versionControlName: Git
   m_baseFolderAdditionalPath: ..\..\
   m_parentFolderCount: 2
-  m_assetTypeValidators: -1
+  m_assetTypeValidators: 6
+  m_isEnabled: 1
