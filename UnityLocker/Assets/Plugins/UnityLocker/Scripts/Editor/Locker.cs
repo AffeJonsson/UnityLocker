@@ -190,11 +190,16 @@ namespace Alf.UnityLocker.Editor
 			}, onError);
 		}
 
+		public static void TryClearLocks(Action onClearLocksComplete, Action<string> onError)
+		{
+			ClearLocks(Container.GetLockSettings().ClearLocksUrl, () => FetchLockedAssets(onClearLocksComplete, onError), onError);
+		}
+
 		public static void FetchLockedAssets(Action onAssetsFetched, Action<string> onError)
 		{
 			sm_nextFetchTime = Time.realtimeSinceStartup + TimeBetweenFetches;
 			var url = Container.GetLockSettings().GetLockedAssetsUrl;
-			FecthLockedAssetsAsync(url, (data) =>
+			FetchLockedAssetsAsync(url, (data) =>
 			{
 				HasFetched = true;
 				if (string.IsNullOrEmpty(data))
@@ -487,7 +492,7 @@ namespace Alf.UnityLocker.Editor
 			return false;
 		}
 
-		private static void FecthLockedAssetsAsync(string url, Action<string> onComplete, Action<string> onError)
+		private static void FetchLockedAssetsAsync(string url, Action<string> onComplete, Action<string> onError)
 		{
 #if UNITY_2018_4_OR_NEWER
 
@@ -571,6 +576,19 @@ namespace Alf.UnityLocker.Editor
 			var form = new WWWForm();
 			form.AddField("Guid", JsonConvert.SerializeObject(assets.Select(a => AssetDatabase.AssetPathToGUID(AssetDatabase.GetAssetPath(a))).ToArray()));
 			form.AddField("Sha", Container.GetVersionControlHandler().GetShaOfHead());
+			var www = new WWW(url, form);
+			Container.GetWWWManager().WaitForWWW(www, onComplete, onError);
+#endif
+		}
+
+		private static void ClearLocks(string url, Action onComplete, Action<string> onError)
+		{
+#if UNITY_2018_4_OR_NEWER
+			var form = new WWWForm();
+			var webRequest = UnityWebRequest.Post(url, form);
+			Container.GetWebRequestManager().WaitForWebRequest(webRequest, onComplete, onError);
+#else
+			var form = new WWWForm();
 			var www = new WWW(url, form);
 			Container.GetWWWManager().WaitForWWW(www, onComplete, onError);
 #endif

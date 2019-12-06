@@ -145,9 +145,16 @@ namespace Alf.UnityLocker.Editor
 					property.intValue = EditorGUI.MaskField(rect, "Valid Asset Types", property.intValue, sm_assetTypeValidatorNames.ToArray());
 				}
 
+				if (GUILayout.Button("Unlock all files"))
+				{
+					if (EditorUtility.DisplayDialog("Unlock all files", "This removes the lock and history from ALL files, NOT ONLY YOURS. This operation cannot be reverted.\nContinue?", "Ok", "Cancel"))
+					{
+						Locker.TryClearLocks(null, null);
+					}
+				}
+
 				if (isEnabledProperty.boolValue && !string.IsNullOrEmpty(Locker.ErrorMessage))
 				{
-
 					EditorGUILayout.LabelField(new GUIContent("Error: " + Locker.ErrorMessage), ErrorStyle);
 				}
 			}

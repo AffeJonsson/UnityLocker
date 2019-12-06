@@ -37,12 +37,18 @@ def unlock_assets_at_commit():
     return ""
 
 
+@app.route('/clear-locks', methods=['POST'])
+def clear_locks():
+    thread = Thread(target=actual_clear_locks)
+    thread.start()
+    return ""
+
+
 # Lock file, removing the unlock sha if it exists.
 def actual_lock_assets(assets, locker):
     lock.acquire(True)
-    file = open("locked-assets.json", "r")
-    js = json.loads('\n'.join(file.readlines()))
-    file.close()
+    with open("locked-assets.json", "r") as file:
+        js = json.loads('\n'.join(file.readlines()))
     assets = json.loads(assets)
 
     for asset in assets:
@@ -55,38 +61,35 @@ def actual_lock_assets(assets, locker):
                 break
         if not found:
             js["RawLockData"].append({"Guid": asset, "LockerName": locker, "Locked": True, "UnlockSha": ""})
-    file = open("locked-assets.json", "w")
-    file.writelines(json.dumps(js))
-    file.close()
+    with open("locked-assets.json", "w") as file:
+        file.writelines(json.dumps(js))
     lock.release()
 
 
 # Unlock file globally, not requiring a specific commit
 def actual_unlock_assets(assets):
     lock.acquire(True)
-    file = open("locked-assets.json", "r")
-    js = json.loads('\n'.join(file.readlines()))
-    file.close()
-    assets = json.loads(assets)
+    with open("locked-assets.json", "r") as file:
+        js = json.loads('\n'.join(file.readlines()))
 
+    assets = json.loads(assets)
     for asset in assets:
         for lock_data in js["RawLockData"]:
             if lock_data["Guid"] == asset:
                 lock_data["Locked"] = False
                 break
 
-    file = open("locked-assets.json", "w")
-    file.writelines(json.dumps(js))
-    file.close()
+    with open("locked-assets.json", "w") as file:
+        file.writelines(json.dumps(js))
+
     lock.release()
 
 
 # Set UnlockSha to require users to be above that commit to be able to modify file.
 def actual_unlock_assets_at_commit(assets, sha):
     lock.acquire(True)
-    file = open("locked-assets.json", "r")
-    js = json.loads('\n'.join(file.readlines()))
-    file.close()
+    with open("locked-assets.json", "r") as file:
+        js = json.loads('\n'.join(file.readlines()))
     assets = json.loads(assets)
 
     for asset in assets:
@@ -96,9 +99,16 @@ def actual_unlock_assets_at_commit(assets, sha):
                 lock_data["UnlockSha"] = sha
                 break
 
-    file = open("locked-assets.json", "w")
-    file.writelines(json.dumps(js))
-    file.close()
+    with open("locked-assets.json", "w") as file:
+        file.writelines(json.dumps(js))
+    lock.release()
+
+
+# Clear all locked files and history
+def actual_clear_locks():
+    lock.acquire(True)
+    with open("locked-assets.json", "w") as file:
+        file.write('{"RawLockData": []}')
     lock.release()
 
 
