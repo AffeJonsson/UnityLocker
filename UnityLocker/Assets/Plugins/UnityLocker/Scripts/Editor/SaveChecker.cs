@@ -12,6 +12,10 @@ namespace Alf.UnityLocker.Editor
 			{
 				return paths;
 			}
+			if (paths.Length == 0)
+			{
+				return paths;
+			}
 			if (!Locker.HasFetched)
 			{
 				for (var i = 0; i < paths.Length; i++)
