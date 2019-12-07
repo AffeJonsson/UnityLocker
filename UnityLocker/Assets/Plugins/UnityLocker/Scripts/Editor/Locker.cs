@@ -502,7 +502,6 @@ namespace Alf.UnityLocker.Editor
 				ErrorMessage = string.Empty;
 				if (onComplete != null)
 				{
-					Debug.Log("Fetched " + webRequest.downloadHandler.text);
 					onComplete(webRequest.downloadHandler.text);
 				}
 			}, (error) =>
