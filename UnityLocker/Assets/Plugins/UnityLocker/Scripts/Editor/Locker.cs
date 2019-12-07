@@ -120,7 +120,7 @@ namespace Alf.UnityLocker.Editor
 				for (var i = 0; i < assets.Length; i++)
 				{
 					var guid = AssetDatabase.AssetPathToGUID(AssetDatabase.GetAssetPath(assets[i]));
-					sm_lockedAssets[assets[i]] = new LockedAssetsData.AssetLockData(guid, Container.GetLockSettings().Username);
+					sm_lockedAssets[assets[i]] = new LockedAssetsData.AssetLockData(guid, Container.GetLockSettings().Username, true, "", DateTime.UtcNow);
 					sm_assetsLockedByMe.Add(assets[i]);
 				}
 				if (OnLockedAssetsChanged != null)
@@ -502,6 +502,7 @@ namespace Alf.UnityLocker.Editor
 				ErrorMessage = string.Empty;
 				if (onComplete != null)
 				{
+					Debug.Log("Fetched " + webRequest.downloadHandler.text);
 					onComplete(webRequest.downloadHandler.text);
 				}
 			}, (error) =>

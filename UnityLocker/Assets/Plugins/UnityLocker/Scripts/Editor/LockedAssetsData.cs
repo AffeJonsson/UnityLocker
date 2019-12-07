@@ -14,21 +14,15 @@ namespace Alf.UnityLocker.Editor
 			public string LockerName;
 			public bool Locked;
 			public string UnlockSha;
-
-			public AssetLockData(string guid, string lockerName)
-			{
-				Guid = guid;
-				LockerName = lockerName;
-				Locked = true;
-				UnlockSha = null;
-			}
-
-			public AssetLockData(string guid, string lockerName, bool locked, string unlockSha)
+			public DateTime Date;
+			
+			public AssetLockData(string guid, string lockerName, bool locked, string unlockSha, DateTime date)
 			{
 				Guid = guid;
 				LockerName = lockerName;
 				Locked = locked;
 				UnlockSha = unlockSha;
+				Date = date;
 			}
 		}
 
