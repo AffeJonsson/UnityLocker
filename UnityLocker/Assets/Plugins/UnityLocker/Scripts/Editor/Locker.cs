@@ -261,6 +261,19 @@ namespace Alf.UnityLocker.Editor
 			}, onError);
 		}
 
+		public static void FetchAssetHistory(UnityEngine.Object asset, Action<AssetHistory.AssetHistoryData[]> onHistoryFetched, Action<string> onError)
+		{
+			var url = Container.GetLockSettings().GetAssetHistoryUrl;
+			FetchAssetHistoryAsync(url, asset, (data) =>
+			{
+				var history = JsonConvert.DeserializeObject<AssetHistory>(data);
+				if (onHistoryFetched != null)
+				{
+					onHistoryFetched.Invoke(history.AssetHistoryDatas);
+				}
+			}, onError);
+		}
+
 		public static bool IsAssetLockedByMe(UnityEngine.Object asset)
 		{
 			if (!HasFetched)
@@ -578,6 +591,49 @@ namespace Alf.UnityLocker.Editor
 			form.AddField("Sha", Container.GetVersionControlHandler().GetShaOfHead());
 			var www = new WWW(url, form);
 			Container.GetWWWManager().WaitForWWW(www, onComplete, onError);
+#endif
+		}
+
+		private static void FetchAssetHistoryAsync(string url, UnityEngine.Object asset, Action<string> onComplete, Action<string> onError)
+		{
+#if UNITY_2018_4_OR_NEWER
+			var form = new WWWForm();
+			form.AddField("Guid", JsonConvert.SerializeObject(AssetDatabase.AssetPathToGUID(AssetDatabase.GetAssetPath(asset))));
+			var webRequest = UnityWebRequest.Post(url, form);
+			Container.GetWebRequestManager().WaitForWebRequest(webRequest, () =>
+			{
+				ErrorMessage = string.Empty;
+				if (onComplete != null)
+				{
+					onComplete(webRequest.downloadHandler.text);
+				}
+			}, (error) =>
+			{
+				ErrorMessage = error;
+				if (onError != null)
+				{
+					onError(error);
+				}
+			});
+#else
+			var form = new WWWForm();
+			form.AddField("Guid", JsonConvert.SerializeObject(AssetDatabase.AssetPathToGUID(AssetDatabase.GetAssetPath(asset))));
+			var www = new WWW(url, form);
+			Container.GetWWWManager().WaitForWWW(www, () =>
+			{
+				ErrorMessage = string.Empty;
+				if (onComplete != null)
+				{
+					onComplete(www.text);
+				}
+			}, (error) =>
+			{
+				ErrorMessage = error;
+				if (onError != null)
+				{
+					onError(error);
+				}
+			});
 #endif
 		}
 

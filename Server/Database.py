@@ -65,7 +65,7 @@ class Database:
         return list(iter(result))[0]
 
     def get_asset_history(self, asset_guid):
-        result = self._cursor.execute("SELECT id, guid, locker, locked, sha, date FROM LockedAssets WHERE guid = ?", (asset_guid,))
+        result = self._cursor.execute("SELECT * FROM LockedAssets WHERE guid = ?", (asset_guid,))
         return list(iter(result))
 
     def get_locked_assets(self):
@@ -78,18 +78,14 @@ class Database:
                                       ") b ON a.id = b.id AND a.guid = b.guid AND a.locked = 1")
         return list(iter(result))
 
+    def get_all_entries(self):
+        result = self._cursor.execute("SELECT * FROM LockedAssets")
+        return list(iter(result))
+
 
 if __name__ == '__main__':
-    db = Database("Test")
-    db.lock_asset("Hej", "Alf")
-    db.unlock_asset("Hej", "1234567890")
-    db.lock_asset("Hej", "Alf")
-    db.revert_asset_lock("Hej")
-    db.lock_asset("Hej2", "Alf")
-    db.lock_asset("Hej3", "Alf")
-    db.lock_asset("Hej", "Alf")
-    for entry in db.get_locked_assets():
-        print(entry)
-    print('---')
-    for entry in db.get_asset_history("Hej"):
+    db = Database("locked-assets")
+    print(db.get_last_entry("c117cf5253981134fb96922aeb56392f"))
+    print(db.get_last_id("c117cf5253981134fb96922aeb56392f"))
+    for entry in db.get_asset_history("c117cf5253981134fb96922aeb56392f"):
         print(entry)

@@ -9,6 +9,7 @@ namespace Alf.UnityLocker.Editor.ContextMenus
 		private const string LockMenuName = "Assets/Lock";
 		private const string RevertMenuName = "Assets/Revert Lock";
 		private const string FinishLockMenuName = "Assets/Finish Lock";
+		private const string ViewHistoryMenuName = "Assets/View History";
 
 		private const int Priority = 600;
 
@@ -109,6 +110,26 @@ namespace Alf.UnityLocker.Editor.ContextMenus
 				}
 			}
 			return true;
+		}
+
+		[MenuItem(ViewHistoryMenuName, priority = Priority + 3)]
+		public static void ViewHistory()
+		{
+			HistoryWindow.Show(Selection.activeObject);
+		}
+
+		[MenuItem(ViewHistoryMenuName, true)]
+		public static bool ValidateViewHistory()
+		{
+			if (!Container.GetLockSettings().IsEnabled)
+			{
+				return false;
+			}
+			if (Selection.activeObject == null)
+			{
+				return false;
+			}
+			return Locker.IsAssetTypeValid(Selection.activeObject);
 		}
 
 		private static void TryLockAssets(UnityEngine.Object[] assets)

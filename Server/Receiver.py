@@ -42,6 +42,17 @@ def clear_locks():
     return ""
 
 
+@app.route('/get-history', methods=['POST'])
+def get_history():
+    guid = json.loads(request.form['Guid'])
+    asset_history = db.get_asset_history(guid)
+    ret = []
+    for asset in asset_history:
+        obj = {"Guid": asset[1], "LockerName": asset[2], "Locked": asset[3], "UnlockSha": asset[4], "Date": asset[5]}
+        ret.append(obj)
+    return json.dumps({"AssetHistory": ret})
+
+
 def actual_lock_assets(assets, locker):
     assets = json.loads(assets)
     for asset in assets:
