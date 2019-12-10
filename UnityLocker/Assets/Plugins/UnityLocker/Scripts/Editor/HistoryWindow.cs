@@ -19,6 +19,7 @@ namespace Alf.UnityLocker.Editor
 
 		public static void Show(Object asset)
 		{
+			asset = Locker.FilterAsset(asset);
 			var window = GetWindow<HistoryWindow>();
 			window.titleContent = new GUIContent(Title);
 			window.m_assetHistory = null;
@@ -76,7 +77,6 @@ namespace Alf.UnityLocker.Editor
 				m_asset = EditorGUILayout.ObjectField(m_asset, typeof(Object), true);
 				if (scope.changed)
 				{
-					m_asset = Locker.FilterAsset(m_asset);
 					m_assetHistory = null;
 					m_isAssetValid = Locker.IsAssetTypeValid(m_asset);
 					if (m_isAssetValid)

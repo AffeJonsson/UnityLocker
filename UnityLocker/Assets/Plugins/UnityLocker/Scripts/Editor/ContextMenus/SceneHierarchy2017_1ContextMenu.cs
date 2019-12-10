@@ -11,7 +11,7 @@ namespace Alf.UnityLocker.Editor.ContextMenus
 		private static Type sm_treeViewType = null;
 		private static Type sm_sceneHierarchyWindowType = null;
 
-		private static void ContinusTryCreateMenu()
+		private static void ContinousTryCreateMenu()
 		{
 			try
 			{
@@ -53,7 +53,7 @@ namespace Alf.UnityLocker.Editor.ContextMenus
 				Debug.LogError(e);
 				return;
 			}
-			EditorApplication.update -= ContinusTryCreateMenu;
+			EditorApplication.update -= ContinousTryCreateMenu;
 		}
 
 		static SceneHierarchy2017_1ContextMenu()
@@ -74,7 +74,7 @@ namespace Alf.UnityLocker.Editor.ContextMenus
 				}
 			}).ContinueWith((t) =>
 			{
-				EditorApplication.update += ContinusTryCreateMenu;
+				EditorApplication.update += ContinousTryCreateMenu;
 			}, context);
 		}
 	}

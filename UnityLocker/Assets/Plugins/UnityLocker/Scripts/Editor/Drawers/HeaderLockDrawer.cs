@@ -46,7 +46,7 @@ namespace Alf.UnityLocker.Editor.Drawers
 				EditorGUILayout.LabelField("Lock", sm_lockLabelStyle, GUILayout.Width(44));
 				using (new EditorGUI.DisabledGroupScope(isLockedByMe || isLockedBySomeoneElse || isLockedNowButUnlockedAtLaterCommit))
 				{
-					if (GUILayout.Button(new GUIContent("Lock"), EditorStyles.miniButton))
+					if (GUILayout.Button(new GUIContent(Constants.LockName), EditorStyles.miniButton))
 					{
 						Locker.TryLockAssets(editor.targets, null, (errorMessage) =>
 						{
@@ -56,20 +56,24 @@ namespace Alf.UnityLocker.Editor.Drawers
 				}
 				using (new EditorGUI.DisabledGroupScope(!isLockedByMe))
 				{
-					if(GUILayout.Button(new GUIContent("Revert Lock"), EditorStyles.miniButton))
+					if (GUILayout.Button(new GUIContent(Constants.RevertName), EditorStyles.miniButton))
 					{
 						Locker.TryRevertAssetLocks(editor.targets, null, (errorMessage) =>
 						{
 							EditorUtility.DisplayDialog("Asset reverting failed", "Asset reverting failed\n" + errorMessage, "OK");
 						});
 					}
-					if (GUILayout.Button(new GUIContent("Finish Lock"), EditorStyles.miniButton))
+					if (GUILayout.Button(new GUIContent(Constants.FinishName), EditorStyles.miniButton))
 					{
 						Locker.TryFinishLockingAssets(editor.targets, null, (errorMessage) =>
 						{
 							EditorUtility.DisplayDialog("Asset finishing failed", "Asset finishing failed\n" + errorMessage, "OK");
 						});
 					}
+				}
+				if (GUILayout.Button(new GUIContent(Constants.HistoryName), EditorStyles.miniButton))
+				{
+					HistoryWindow.Show(editor.target);
 				}
 			}
 

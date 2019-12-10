@@ -6,10 +6,10 @@ namespace Alf.UnityLocker.Editor.ContextMenus
 	[InitializeOnLoad]
 	public static class AssetContextMenu
 	{
-		private const string LockMenuName = "Assets/Lock";
-		private const string RevertMenuName = "Assets/Revert Lock";
-		private const string FinishLockMenuName = "Assets/Finish Lock";
-		private const string ViewHistoryMenuName = "Assets/View History";
+		private const string LockMenuName = "Assets/" + Constants.LockName;
+		private const string RevertMenuName = "Assets/" + Constants.RevertName;
+		private const string FinishLockMenuName = "Assets/" + Constants.FinishName;
+		private const string ViewHistoryMenuName = "Assets/" + Constants.HistoryName;
 
 		private const int Priority = 600;
 
