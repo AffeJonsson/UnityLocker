@@ -7,16 +7,20 @@ namespace Alf.UnityLocker.Editor
 	{
 		private Object m_asset;
 		private AssetHistory.AssetHistoryData[] m_assetHistory;
+		private bool m_isAssetValid;
 		private bool m_isLoadingHistory;
 		private Vector2 m_scrollPosition;
 		private float m_maxLockerWidth;
 
 		private const int IconSpacing = 2;
+		private const string LockerHeader = "User";
+		private const string DateHeader = "Date";
+		private const string Title = "Asset History";
 
 		public static void Show(Object asset)
 		{
 			var window = GetWindow<HistoryWindow>();
-			window.titleContent = new GUIContent("Asset History");
+			window.titleContent = new GUIContent(Title);
 			window.m_assetHistory = null;
 			window.m_isLoadingHistory = true;
 			window.m_asset = asset;
@@ -25,8 +29,8 @@ namespace Alf.UnityLocker.Editor
 			{
 				window.m_assetHistory = data;
 				window.m_isLoadingHistory = false;
-				window.m_maxLockerWidth = 0f;
-				var maxDateWidth = 0f;
+				window.m_maxLockerWidth = EditorStyles.label.CalcSize(new GUIContent(LockerHeader)).x;
+				var maxDateWidth = EditorStyles.label.CalcSize(new GUIContent(DateHeader)).x;
 				var iconWidth = Container.GetLockSettings().LockedByMeIconLarge.width;
 				for (var i = 0; i < window.m_assetHistory.Length; i++)
 				{
@@ -54,25 +58,49 @@ namespace Alf.UnityLocker.Editor
 		{
 			m_assetHistory = null;
 			m_isLoadingHistory = false;
+			m_isAssetValid = false;
+			if (m_asset != null)
+			{
+				m_isAssetValid = Locker.IsAssetTypeValid(m_asset);
+				if (m_isAssetValid)
+				{
+					Show(m_asset);
+				}
+			}
 		}
 
 		private void OnGUI()
 		{
+			using (var scope = new EditorGUI.ChangeCheckScope())
+			{
+				m_asset = EditorGUILayout.ObjectField(m_asset, typeof(Object), true);
+				if (scope.changed)
+				{
+					m_asset = Locker.FilterAsset(m_asset);
+					m_assetHistory = null;
+					m_isAssetValid = Locker.IsAssetTypeValid(m_asset);
+					if (m_isAssetValid)
+					{
+						Show(m_asset);
+					}
+				}
+			}
+			var currentEvent = Event.current;
 			if (m_assetHistory == null)
 			{
 				if (m_isLoadingHistory)
 				{
 					EditorGUILayout.LabelField("Loading...");
 				}
-				else
+				else if (m_asset == null)
 				{
 					EditorGUILayout.LabelField("Select an asset to view history");
 				}
+				else if (!m_isAssetValid)
+				{
+					EditorGUILayout.LabelField("Asset is not a valid lockable asset");
+				}
 				return;
-			}
-			using (new EditorGUI.DisabledGroupScope(true))
-			{
-				EditorGUILayout.ObjectField(m_asset, typeof(Object), false);
 			}
 			{
 				var controlRect = EditorGUILayout.GetControlRect(false, 1);
@@ -80,24 +108,49 @@ namespace Alf.UnityLocker.Editor
 			}
 			using (var scroll = new EditorGUILayout.ScrollViewScope(m_scrollPosition))
 			{
-				DrawEntry(Container.GetLockSettings().LockIconLarge, "Date", "User");
+				var repaint = false;
+				DrawSimpleEntry(Container.GetLockSettings().LockIconLarge, DateHeader, LockerHeader, "");
+				var controlRect = EditorGUILayout.GetControlRect(false, 1);
+
+				if (m_assetHistory.Length > 0)
 				{
-					var controlRect = EditorGUILayout.GetControlRect(false, 1);
-					EditorGUI.DrawRect(controlRect, Color.gray);
-				}
-				for (var i = 0; i < m_assetHistory.Length; i++)
-				{
-					var history = m_assetHistory[i];
-					var icon = history.Locked ? Container.GetLockSettings().LockIconLarge : (string.IsNullOrEmpty(history.UnlockSha) ? Container.GetLockSettings().LockedByMeIconLarge : Container.GetLockSettings().LockedNowButUnlockedLaterIconLarge);
-					DrawEntry(icon, history.Date.ToString(), history.LockerName);
+					var height = EditorGUIUtility.singleLineHeight * m_assetHistory.Length + EditorGUIUtility.standardVerticalSpacing * m_assetHistory.Length;
+					GUI.Box(new Rect(controlRect.x, controlRect.y + EditorGUIUtility.standardVerticalSpacing, controlRect.width, height), "", GUI.skin.box);
+					for (var i = 0; i < m_assetHistory.Length; i++)
+					{
+						var rect = EditorGUILayout.GetControlRect();
+						var history = m_assetHistory[i];
+						var hasUnlockSha = !string.IsNullOrEmpty(history.UnlockSha);
+						var icon = history.Locked ? Container.GetLockSettings().LockIconLarge : (hasUnlockSha ? Container.GetLockSettings().LockedNowButUnlockedLaterIconLarge : Container.GetLockSettings().LockedByMeIconLarge);
+						DrawSimpleEntry(rect, icon, history.Date.ToString(), history.LockerName, hasUnlockSha ? "Unlocked at commit " + history.UnlockSha + " (right click to copy)" : "");
+						if (hasUnlockSha && currentEvent.isMouse && currentEvent.button == 1 && currentEvent.type == EventType.MouseDown && rect.Contains(currentEvent.mousePosition))
+						{
+							currentEvent.Use();
+							EditorGUIUtility.systemCopyBuffer = history.UnlockSha;
+						}
+						if (i != m_assetHistory.Length - 1)
+						{
+							EditorGUI.DrawRect(new Rect(rect.x + 1, rect.y + rect.height, rect.width - 2, 1), new Color(0.7f, 0.7f, 0.7f));
+						}
+					}
 				}
 				m_scrollPosition = scroll.scrollPosition;
+				if (repaint)
+				{
+					Repaint();
+				}
 			}
 		}
 
-		private void DrawEntry(Texture2D icon, string date, string locker)
+		private void DrawSimpleEntry(Texture2D icon, string date, string locker, string toolTip)
 		{
-			var rect = EditorGUILayout.GetControlRect();
+			DrawSimpleEntry(EditorGUILayout.GetControlRect(), icon, date, locker, toolTip);
+		}
+
+		private void DrawSimpleEntry(Rect rect, Texture2D icon, string date, string locker, string toolTip)
+		{
+			rect.x += 1;
+			rect.width -= 2;
 			var controlRect = rect;
 			var dateContent = new GUIContent(date);
 			var dateStyle = new GUIStyle
@@ -110,13 +163,19 @@ namespace Alf.UnityLocker.Editor
 				alignment = TextAnchor.MiddleCenter
 			};
 			rect.width = icon.width;
+			rect.y += (rect.height - icon.height) / 2 + 1;
 			EditorGUI.LabelField(rect, new GUIContent(icon));
+			rect.y = controlRect.y;
 			rect.x += rect.width + IconSpacing;
 			rect.width = controlRect.width - rect.width - IconSpacing - m_maxLockerWidth - IconSpacing;
 			EditorGUI.LabelField(rect, dateContent, dateStyle);
 			rect.x = controlRect.x + controlRect.width - m_maxLockerWidth;
 			rect.width = m_maxLockerWidth;
 			EditorGUI.LabelField(rect, lockerContent, lockerStyle);
+			if (!string.IsNullOrEmpty(toolTip))
+			{
+				EditorGUI.LabelField(controlRect, new GUIContent("", toolTip));
+			}
 		}
 	}
 }

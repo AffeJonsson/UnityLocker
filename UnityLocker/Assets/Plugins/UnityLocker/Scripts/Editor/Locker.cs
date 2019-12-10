@@ -418,23 +418,7 @@ namespace Alf.UnityLocker.Editor
 			return true;
 		}
 
-		#region Private API
-		private static UnityEngine.Object[] GetAssetsWhereLockIsValid(UnityEngine.Object[] assets)
-		{
-			return assets.Select(o => FilterAsset(o)).Where(o => GetIsLockValid(o)).ToArray();
-		}
-
-		private static UnityEngine.Object[] GetAssetsWhereRevertLockIsValid(UnityEngine.Object[] assets)
-		{
-			return assets.Select(o => FilterAsset(o)).Where(o => GetIsRevertLockValid(o)).ToArray();
-		}
-
-		private static UnityEngine.Object[] GetAssetsWhereFinishLockIsValid(UnityEngine.Object[] assets)
-		{
-			return assets.Select(o => FilterAsset(o)).Where(o => GetIsFinishLockValid(o)).ToArray();
-		}
-
-		private static UnityEngine.Object FilterAsset(UnityEngine.Object asset)
+		public static UnityEngine.Object FilterAsset(UnityEngine.Object asset)
 		{
 			if (asset == null)
 			{
@@ -466,6 +450,22 @@ namespace Alf.UnityLocker.Editor
 			}
 			var source = PrefabUtility.GetCorrespondingObjectFromSource(asset);
 			return source ?? asset;
+		}
+
+		#region Private API
+		private static UnityEngine.Object[] GetAssetsWhereLockIsValid(UnityEngine.Object[] assets)
+		{
+			return assets.Select(o => FilterAsset(o)).Where(o => GetIsLockValid(o)).ToArray();
+		}
+
+		private static UnityEngine.Object[] GetAssetsWhereRevertLockIsValid(UnityEngine.Object[] assets)
+		{
+			return assets.Select(o => FilterAsset(o)).Where(o => GetIsRevertLockValid(o)).ToArray();
+		}
+
+		private static UnityEngine.Object[] GetAssetsWhereFinishLockIsValid(UnityEngine.Object[] assets)
+		{
+			return assets.Select(o => FilterAsset(o)).Where(o => GetIsFinishLockValid(o)).ToArray();
 		}
 
 		private static bool IsAssetLocked(UnityEngine.Object asset)
