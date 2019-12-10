@@ -43,8 +43,8 @@ namespace Alf.UnityLocker.Editor.Drawers
 			}
 			else
 			{
-				var corr = PrefabUtility.GetCorrespondingObjectFromSource(asset);
-				LockDrawer.TryDrawLock(selectionRect, corr ?? asset, LockDrawer.DrawType.Background);
+				asset = Locker.FilterAsset(asset);
+				LockDrawer.TryDrawLock(selectionRect, asset, LockDrawer.DrawType.Background);
 			}
 		}
 	}

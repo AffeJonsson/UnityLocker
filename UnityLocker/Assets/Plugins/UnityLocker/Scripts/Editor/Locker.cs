@@ -448,8 +448,20 @@ namespace Alf.UnityLocker.Editor
 			{
 				asset = AssetDatabase.LoadAssetAtPath<UnityEngine.Object>(importer.assetPath);
 			}
+#if UNITY_2018_3_OR_NEWER
 			var source = PrefabUtility.GetCorrespondingObjectFromSource(asset);
-			return source ?? asset;
+			if (source != null)
+			{
+				asset = source;
+			}
+#elif UNITY_2017_1_OR_NEWER
+			var source = PrefabUtility.GetPrefabParent(asset);
+			if (source != null)
+			{
+				asset = source;
+			}
+#endif
+			return asset;
 		}
 
 		#region Private API

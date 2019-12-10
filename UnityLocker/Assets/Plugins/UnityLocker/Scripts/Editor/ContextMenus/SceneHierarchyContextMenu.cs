@@ -136,10 +136,10 @@ namespace Alf.UnityLocker.Editor.ContextMenus
 		private static void AddLockItems(GenericMenu menu, UnityEngine.Object asset)
 		{
 			menu.AddSeparator("");
-			AddSingleMenuItem(menu, asset, Locker.GetIsLockValid, new GUIContent(Constants.LockName), () => TryLockAssets(new UnityEngine.Object[] { PrefabUtility.GetCorrespondingObjectFromSource(asset) ?? asset }));
-			AddSingleMenuItem(menu, asset, Locker.GetIsRevertLockValid, new GUIContent(Constants.RevertName), () => TryRevertAssets(new UnityEngine.Object[] { PrefabUtility.GetCorrespondingObjectFromSource(asset) ?? asset }));
-			AddSingleMenuItem(menu, asset, Locker.GetIsFinishLockValid, new GUIContent(Constants.FinishName), () => TryFinishLockingAssets(new UnityEngine.Object[] { PrefabUtility.GetCorrespondingObjectFromSource(asset) ?? asset }));
-			AddSingleMenuItem(menu, asset, Locker.IsAssetTypeValid, new GUIContent(Constants.HistoryName), () => HistoryWindow.Show(PrefabUtility.GetCorrespondingObjectFromSource(asset) ?? asset));
+			AddSingleMenuItem(menu, asset, Locker.GetIsLockValid, new GUIContent(Constants.LockName), () => TryLockAssets(new UnityEngine.Object[] { asset }));
+			AddSingleMenuItem(menu, asset, Locker.GetIsRevertLockValid, new GUIContent(Constants.RevertName), () => TryRevertAssets(new UnityEngine.Object[] { asset }));
+			AddSingleMenuItem(menu, asset, Locker.GetIsFinishLockValid, new GUIContent(Constants.FinishName), () => TryFinishLockingAssets(new UnityEngine.Object[] { asset }));
+			AddSingleMenuItem(menu, asset, Locker.IsAssetTypeValid, new GUIContent(Constants.HistoryName), () => HistoryWindow.Show(asset));
 		}
 
 		private static void AddSingleMenuItem(GenericMenu menu, UnityEngine.Object asset, Func<UnityEngine.Object, bool> validationMethod, GUIContent guiContent, GenericMenu.MenuFunction onClick)
