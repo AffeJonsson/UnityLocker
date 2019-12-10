@@ -17,6 +17,12 @@ namespace Alf.UnityLocker.Editor
 		private const string DateHeader = "Date";
 		private const string Title = "Asset History";
 
+		[MenuItem("Window/Asset History")]
+		public static void ShowWindow()
+		{
+			GetWindow<HistoryWindow>().Show();
+		}
+
 		public static void Show(Object asset)
 		{
 			asset = Locker.FilterAsset(asset);
