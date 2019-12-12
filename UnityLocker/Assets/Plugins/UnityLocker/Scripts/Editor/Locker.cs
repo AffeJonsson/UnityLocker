@@ -448,7 +448,7 @@ namespace Alf.UnityLocker.Editor
 			{
 				asset = AssetDatabase.LoadAssetAtPath<UnityEngine.Object>(importer.assetPath);
 			}
-#if UNITY_2018_3_OR_NEWER
+#if UNITY_2018_2_OR_NEWER
 			var source = PrefabUtility.GetCorrespondingObjectFromSource(asset);
 			if (source != null)
 			{

@@ -17,12 +17,16 @@ namespace Alf.UnityLocker.Editor.ContextMenus
 			{
 				var sceneHierarchyWindow = EditorWindow.GetWindow(sm_sceneHierarchyWindowType);
 				var getSceneByHandleMethod = typeof(UnityEditor.SceneManagement.EditorSceneManager).GetMethod("GetSceneByHandle", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static);
-				
+
 				var treeViewField = sm_sceneHierarchyWindowType.GetField("m_TreeView", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
 				var createMultiSceneHeaderContextClickMethod = sm_sceneHierarchyWindowType.GetMethod("CreateMultiSceneHeaderContextClick", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
 				var createGameObjectContextClickMethod = sm_sceneHierarchyWindowType.GetMethod("CreateGameObjectContextClick", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
 				var isSceneHeaderInHierarchyWindowMethod = sm_sceneHierarchyWindowType.GetMethod("IsSceneHeaderInHierarchyWindow", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
 				var treeView = treeViewField.GetValue(sceneHierarchyWindow);
+				if (treeView == null)
+				{
+					return;
+				}
 				var property = sm_treeViewType.GetProperty("contextClickItemCallback", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance);
 				var e = (Action<int>)property.GetValue(treeView);
 				e = (id) =>
