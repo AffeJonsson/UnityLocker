@@ -7,11 +7,17 @@ My team had issues with people working in the same scene simultaneously, and dec
 
 ## How it works
 UnityLocker checks with a server which files are locked, and displays padlock icons on those files. In the hierarchy window, locked scenes and prefabs are displayed by a colored box overlay.
+
 ![Scene locked by you](/Readme/hierarchy_scene_locked.png)
+
 ![Scene unlocked at a later commit](/Readme/hierarchy_scene_locked_unlocked_later.png)
+
 ![Scene locked by someone else](/Readme/hierarchy_scene_locked_someone_else.png)
+
 The green one means that you have locked that file, no one can save that asset except you.
+
 The yellow one means that someone had locked it, but then finished their work and unlocked it. To make it saveable for you again, you need to be ahead of their commit.
+
 The red one means that the file is currently locked by someone else.
 
 ### Lock
