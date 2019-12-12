@@ -10,13 +10,13 @@ UnityLocker checks with a server which files are locked, and displays padlock ic
 
 ![Scene locked by you](/Readme/hierarchy_scene_locked.png)
 
-![Scene unlocked at a later commit](/Readme/hierarchy_scene_locked_unlocked_later.png)
-
-![Scene locked by someone else](/Readme/hierarchy_scene_locked_someone_else.png)
-
 The green one means that you have locked that file, no one can save that asset except you.
 
+![Scene unlocked at a later commit](/Readme/hierarchy_scene_locked_unlocked_later.png)
+
 The yellow one means that someone had locked it, but then finished their work and unlocked it. To make it saveable for you again, you need to be ahead of their commit.
+
+![Scene locked by someone else](/Readme/hierarchy_scene_locked_someone_else.png)
 
 The red one means that the file is currently locked by someone else.
 
