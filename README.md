@@ -1,6 +1,6 @@
 # UnityLocker
 ## About
-UnityLocker is a tool that allows teams to lock files inside unity, which makes them unsavable for other users. This is specially useful when working with scenes and prefabs that are usually the cause of hard-to-fix conflicts and headaches.
+UnityLocker is a tool that allows teams to lock assets inside unity, which makes them unsavable for other users. This is specially useful when working with scenes and prefabs that are usually the cause of hard-to-fix conflicts and headaches.
 
 ## Why this was created
 My team had issues with people working in the same scene simultaneously, and decided that was no longer a possibility. The solution they came up with was to write in Slack which scenes they were working on, and when they no longer were working with them. As you might expect, it's hard to see what scenes are taken and when they're not, which is why I created this.
