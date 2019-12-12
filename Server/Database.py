@@ -75,7 +75,7 @@ class Database:
                                       "  SELECT MAX(id) id, guid, locker, locked, sha, date "
                                       "  FROM LockedAssets "
                                       "  GROUP BY guid "
-                                      ") b ON a.id = b.id AND a.guid = b.guid AND a.locked = 1")
+                                      ") b ON a.id = b.id AND a.guid = b.guid AND (a.locked = 1 OR a.sha != '')")
         return list(iter(result))
 
     def get_all_entries(self):
@@ -85,7 +85,10 @@ class Database:
 
 if __name__ == '__main__':
     db = Database("locked-assets")
-    print(db.get_last_entry("c117cf5253981134fb96922aeb56392f"))
-    print(db.get_last_id("c117cf5253981134fb96922aeb56392f"))
-    for entry in db.get_asset_history("c117cf5253981134fb96922aeb56392f"):
+    all_entries = db.get_all_entries()
+    locked = db.get_locked_assets()
+    for l in locked:
+        print(l)
+    print('----');
+    for entry in all_entries:
         print(entry)
