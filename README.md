@@ -2,24 +2,37 @@
 ## About
 UnityLocker is a tool that allows teams to lock files inside unity, which makes them unsavable for other users. This is specially useful when working with scenes and prefabs that are usually the cause of hard-to-fix conflicts and headaches.
 
+## Why this was created
+My team had issues with people working in the same scene simultaneously, and decided that was no longer a possibility. The solution they came up with was to write in Slack which scenes they were working on, and when they no longer were working with them. As you might expect, it's hard to see what scenes are taken and when they're not, which is why I created this.
+
 ## How it works
-UnityLocker needs a connection to some kind of server instance, where lock data is stored. As an example, a Flask app has been provided which listenes to requests about locking, unlocking and getting the status of locked assets. 
-Inside Unity, right clicking an asset presents a context menu which contains the buttons "Lock", "Revert Lock" and "Finish Lock".
+UnityLocker checks with a server which files are locked, and displays padlock icons on those files. In the hierarchy window, locked scenes and prefabs are displayed by a colored box overlay.
+![Scene locked by you](/Readme/hierarchy_scene_locked.png)
+![Scene unlocked at a later commit](/Readme/hierarchy_scene_locked_unlocked_later.png)
+![Scene locked by someone else](/Readme/hierarchy_scene_locked_someone_else.png)
+The green one means that you have locked that file, no one can save that asset except you.
+The yellow one means that someone had locked it, but then finished their work and unlocked it. To make it saveable for you again, you need to be ahead of their commit.
+The red one means that the file is currently locked by someone else.
 
 ### Lock
-Locking an assets marks the selected assets, and other users cannot save those particular assets. To lock a file, either right click an asset and select "Lock", or select an asset and via the Asset menu, select "Lock". Scenes can also be locked by right clicking them in the hierarchy, and selecting "Lock".
+Locking an assets marks the selected assets, and other users cannot save those particular assets.
 
 ### Revert Lock
-Reverting a file is used when you either locked a file by accident, or locked a file but never changed it. To unlock a file, either right click an asset and select "Revert Lock", or select an asset and via the Asset menu, select "Revert Lock". Scene locks can also be reverted by right clicking them in the hierarchy, and selecting "Revert Lock".
+Reverting a file is used when you either locked a file by accident, or locked a file but never changed it. 
 
 ### Finish Lock
-Finishing a file marks the asset as unlocked for users above your current commit. This means that they need to have your changes merged into their branch before being able to save the asset and/or lock the file. To finish a file, either right click an asset and select "Finish Lock", or select an asset and via the Asset menu, select "Finish Lock". Scenes can also be unlocked by right clicking them in the hierarchy, and selecting "Finish Lock".
+Finishing a file marks the asset as unlocked for users above your current commit. This means that they need to have your changes merged into their branch before being able to save the asset and/or lock the file. 
 
 ## Locked Files Window
-To open, click Window/Locked Files. Here, the files locked by you and others are displayed.
+This window displays all files currently locked by you and everyone else.
+To open, click Window/Locked Files.
+
+## Asset History Window
+This window displays when and by who the file was locked an unlocked.
+To open, click Window/Asset History.
 
 ## Installation
-1. Download the sample server and run Starter.bat. This will start a flask app on your device that listenes to port 5000.
+1. Download Server.zip, extract and run Starter.bat. This will start a flask app on your device that listenes to port 5000.
 2. Add the needed files to your Unity project (More info below!), then open the settings file (Tools/Open Locker Settings File).
 3. Fill in the missing information:
 
@@ -41,4 +54,4 @@ To open, click Window/Locked Files. Here, the files locked by you and others are
 
 `lockerversioncontrolgit.unitypackage` This adds the ability to use Git as your version control handler. (.NET 4.6 needed)
 
-`lockerlibgit2sharp.unitypackage` This is needed for the Git version control handler to work. If your project already has a LibGit2Sharp plugin, this is not needed. (https://github.com/libgit2/libgit2sharp, MIT Licence) (.NET 4.6 needed)
+`lockerlibgit2sharp.unitypackage` This is needed for the Git version control handler to work. If your project already has a LibGit2Sharp plugin, this is not needed. (https://github.com/libgit2/libgit2sharp, MIT Licence) (.NET 4.6 needed, does not work for Unity 2017)
