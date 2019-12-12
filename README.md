@@ -21,20 +21,20 @@ The yellow one means that someone had locked it, but then finished their work an
 The red one means that the file is currently locked by someone else.
 
 ### Lock
-Locking an assets marks the selected assets, and other users cannot save those particular assets.
+Locking assets marks the selected assets as locked, and other users cannot save those particular assets.
 
 ### Revert Lock
-Reverting a file is used when you either locked a file by accident, or locked a file but never changed it. 
+Reverting assets should be done when you either locked assets by accident, or locked assets but never changed them. 
 
 ### Finish Lock
-Finishing a file marks the asset as unlocked for users above your current commit. This means that they need to have your changes merged into their branch before being able to save the asset and/or lock the file. 
+Finishing assets marks the selected assets as unlocked for users above your current commit. This means that they need to have your changes merged into their branch before being able to save the assets and/or lock the assets. 
 
 ## Locked Files Window
-This window displays all files currently locked by you and everyone else.
+This window displays all assets currently locked by you and everyone else.
 To open, click Window/Locked Files.
 
 ## Asset History Window
-This window displays when and by who the file was locked an unlocked.
+This window displays when and by who the assets were locked an unlocked.
 To open, click Window/Asset History.
 
 ## Installation
@@ -58,6 +58,6 @@ To open, click Window/Asset History.
 
 `lockerjsondotnet.unitypackage` This is the only package that UnityLocker is dependent on. If your project already has a JSON.NET plugin, this is not needed. (https://github.com/JamesNK/Newtonsoft.Json, MIT licence)
 
-`lockerversioncontrolgit.unitypackage` This adds the ability to use Git as your version control handler. (.NET 4.6 needed)
+`lockerversioncontrolgit.unitypackage` This adds the ability to use Git as your version control handler. (LibGit2Sharp required)
 
 `lockerlibgit2sharp.unitypackage` This is needed for the Git version control handler to work. If your project already has a LibGit2Sharp plugin, this is not needed. (https://github.com/libgit2/libgit2sharp, MIT Licence) (.NET 4.6 needed, does not work for Unity 2017)
