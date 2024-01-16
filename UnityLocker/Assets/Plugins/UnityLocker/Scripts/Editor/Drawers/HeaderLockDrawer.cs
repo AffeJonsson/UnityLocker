@@ -8,10 +8,6 @@ namespace Alf.UnityLocker.Editor.Drawers
 	public static class HeaderLockDrawer
 	{
 		private static readonly Rect sm_headerRect = new Rect(7, 7, 21, 21);
-		private static readonly GUIStyle sm_lockLabelStyle = new GUIStyle
-		{
-			alignment = TextAnchor.MiddleRight
-		};
 
 		static HeaderLockDrawer()
 		{
@@ -43,7 +39,6 @@ namespace Alf.UnityLocker.Editor.Drawers
 
 			using (new GUILayout.HorizontalScope())
 			{
-				EditorGUILayout.LabelField("Lock", sm_lockLabelStyle, GUILayout.Width(44));
 				using (new EditorGUI.DisabledGroupScope(isLockedByMe || isLockedBySomeoneElse || isLockedNowButUnlockedAtLaterCommit))
 				{
 					if (GUILayout.Button(new GUIContent(Constants.LockName), EditorStyles.miniButton))

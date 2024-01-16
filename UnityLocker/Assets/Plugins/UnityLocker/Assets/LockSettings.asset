@@ -21,7 +21,7 @@ MonoBehaviour:
     type: 3}
   m_lockedNowButUnlockedLaterIconLarge: {fileID: 2800000, guid: 2fe487a601e19274385d2e497176303c,
     type: 3}
-  m_baseUrl: localhost:5000
+  m_baseUrl: 
   m_versionControlName: Git
   m_baseFolderAdditionalPath: ..\..\
   m_parentFolderCount: 2

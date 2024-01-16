@@ -136,7 +136,7 @@ namespace Alf.UnityLocker.Editor
 						}
 						if (i != m_assetHistory.Length - 1)
 						{
-							EditorGUI.DrawRect(new Rect(rect.x + 1, rect.y + rect.height, rect.width - 2, 1), new Color(0.7f, 0.7f, 0.7f));
+							EditorGUI.DrawRect(new Rect(rect.x + 1, rect.y + rect.height + 1, rect.width - 2, 1), new Color(0.7f, 0.7f, 0.7f));
 						}
 					}
 				}
@@ -163,11 +163,13 @@ namespace Alf.UnityLocker.Editor
 			{
 				alignment = TextAnchor.MiddleCenter
 			};
+			dateStyle.normal.textColor = Color.white;
 			var lockerContent = new GUIContent(locker);
 			var lockerStyle = new GUIStyle
 			{
 				alignment = TextAnchor.MiddleCenter
 			};
+			lockerStyle.normal.textColor = Color.white;
 			rect.width = icon.width;
 			rect.y += (rect.height - icon.height) / 2 + 1;
 			EditorGUI.LabelField(rect, new GUIContent(icon));

@@ -15,7 +15,7 @@ namespace Alf.UnityLocker.Editor
 			public bool Locked;
 			public string UnlockSha;
 			public DateTime Date;
-			
+
 			public AssetLockData(string guid, string lockerName, bool locked, string unlockSha, DateTime date)
 			{
 				Guid = guid;

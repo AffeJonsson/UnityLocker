@@ -8,16 +8,16 @@ using UnityEngine;
 
 namespace Alf.UnityLocker.Editor
 {
+	[InitializeOnLoad]
 	public static class Container
 	{
 		private static readonly Dictionary<string, IVersionControlHandler> sm_versionControlHandlers;
 		private static readonly AssetTypeValidatorCollection sm_assetTypeValidators;
 		private static readonly LockSettings sm_lockSettings;
-#if !UNITY_2018_4_OR_NEWER
-		private static readonly WWWManager sm_wWWManager;
-#endif
 #if UNITY_2018_4_OR_NEWER
 		private static readonly WebRequestManager sm_webRequestManager;
+#else
+		private static readonly WWWManager sm_wWWManager;
 #endif
 
 		static Container()
@@ -87,11 +87,10 @@ namespace Alf.UnityLocker.Editor
 				}
 			}
 
-#if !UNITY_2018_4_OR_NEWER
-			sm_wWWManager = new WWWManager();
-#endif
 #if UNITY_2018_4_OR_NEWER
 			sm_webRequestManager = new WebRequestManager();
+#else
+			sm_wWWManager = new WWWManager();
 #endif
 		}
 
@@ -110,17 +109,16 @@ namespace Alf.UnityLocker.Editor
 			return sm_lockSettings;
 		}
 
-#if !UNITY_2018_4_OR_NEWER
-		public static WWWManager GetWWWManager()
-		{
-			return sm_wWWManager;
-		}
-#endif
 
 #if UNITY_2018_4_OR_NEWER
 		public static WebRequestManager GetWebRequestManager()
 		{
 			return sm_webRequestManager;
+		}
+#else
+		public static WWWManager GetWWWManager()
+		{
+			return sm_wWWManager;
 		}
 #endif
 

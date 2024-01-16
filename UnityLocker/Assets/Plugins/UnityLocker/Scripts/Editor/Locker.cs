@@ -427,10 +427,19 @@ namespace Alf.UnityLocker.Editor
 #if UNITY_2018_3_OR_NEWER
 			if (!AssetDatabase.Contains(asset))
 			{
-				var currentStage = UnityEditor.Experimental.SceneManagement.PrefabStageUtility.GetCurrentPrefabStage();
+				var currentStage = 
+#if UNITY_2021_2_OR_NEWER
+				UnityEditor.SceneManagement.PrefabStageUtility.GetCurrentPrefabStage();
+#else
+				UnityEditor.Experimental.SceneManagement.PrefabStageUtility.GetCurrentPrefabStage();
+#endif
 				if (currentStage != null && currentStage.prefabContentsRoot == asset)
 				{
+#if UNITY_2021_2_OR_NEWER
+					return AssetDatabase.LoadAssetAtPath<UnityEngine.Object>(currentStage.assetPath);
+#else
 					return AssetDatabase.LoadAssetAtPath<UnityEngine.Object>(currentStage.prefabAssetPath);
+#endif
 				}
 				if (PrefabUtility.GetPrefabAssetType(asset) == PrefabAssetType.NotAPrefab)
 				{

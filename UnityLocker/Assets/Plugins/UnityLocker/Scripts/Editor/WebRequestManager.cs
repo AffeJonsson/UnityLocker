@@ -45,7 +45,11 @@ namespace Alf.UnityLocker.Editor
 					{
 						EditorApplication.update -= Update;
 					}
+#if UNITY_2020_2_OR_NEWER
+					if (webRequestAction.WebRequestOperation.webRequest.result == UnityWebRequest.Result.ProtocolError || webRequestAction.WebRequestOperation.webRequest.result == UnityWebRequest.Result.ConnectionError)
+#else
 					if (webRequestAction.WebRequestOperation.webRequest.isHttpError || webRequestAction.WebRequestOperation.webRequest.isNetworkError)
+#endif
 					{
 						if (webRequestAction.OnError != null)
 						{
